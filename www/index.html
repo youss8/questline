@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#0b0c0f">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Questline</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.png" type="image/png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app"><main id="view"></main></div>
+<nav id="nav" aria-label="Main">
+  <div class="in">
+    <button data-tab="today" data-icon="swords">Today</button>
+    <button data-tab="plan" data-icon="calendar-days">Plan</button>
+    <button data-tab="fuel" data-icon="utensils">Fuel</button>
+    <button data-tab="quests" data-icon="scroll-text">Quests</button>
+    <button data-tab="you" data-icon="user-round">You</button>
+  </div>
+</nav>
+<div id="banner" role="status" aria-live="polite"></div>
+<div id="toast" role="status" aria-live="polite"></div>
+<input type="file" id="importFile" accept="application/json,.json" hidden>
+<script src="js/util.js"></script>
+<script src="js/icons.js"></script>
+<script src="js/content.js"></script>
+<script src="js/foods.js"></script>
+<script src="js/state.js"></script>
+<script src="js/sfx.js"></script>
+<script src="js/schedule.js"></script>
+<script src="js/nutrition.js"></script>
+<script src="js/program.js"></script>
+<script src="js/game.js"></script>
+<script src="js/native.js"></script>
+<script src="js/fx.js"></script>
+<script src="js/views.js"></script>
+<script src="js/sheets.js"></script>
+<script src="js/onboarding.js"></script>
+<script>document.querySelectorAll('#nav button').forEach(function (b) { b.insertAdjacentHTML('afterbegin', Q.ic(b.dataset.icon)); });</script>
+<script src="js/main.js"></script>
+</body>
+</html>
