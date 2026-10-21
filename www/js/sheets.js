@@ -130,7 +130,7 @@
       <button class="btn primary wide big" data-act="nutri-save">Save</button>`, { full: true });
   };
   Q.grocerySheet = () => {
-    const from = Q.today(), list = Q.groceryList(from, 7);
+    const from = Q.S.program.start && Q.S.program.start > Q.today() ? Q.S.program.start : Q.today(), list = Q.groceryList(from, 7);
     const order = ['Meat', 'Dairy & eggs', 'Grains & bread', 'Vegetables', 'Fruit', 'Legumes', 'Pantry'];
     Q.sheet(`<div class="kicker">${Q.niceDate(from)} – ${Q.niceDate(Q.addDays(from, 6))}</div><h3>Grocery list</h3><p class="muted small">Exact totals from your next 7 days of meals. Meat and veg raw; rice and pasta cooked weight (roughly ⅓ of that dry).</p>
       ${order.filter(c => list[c]).map(c => `<div class="sec"><span>${c}</span></div><div class="glist">${list[c].map(i => `<label class="gi"><input type="checkbox"><span>${esc(i.n)}</span><b>${esc(i.amt)}</b></label>`).join('')}</div>`).join('')}`, { full: true });

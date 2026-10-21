@@ -66,7 +66,7 @@
     if (s === ST.food) return shell('Nutrition · 3 of 3', 'Anything you don\'t eat or can\'t get?', 'Meals are only built from foods you can actually buy and eat.', `
         <div class="chips big" id="n-ex">${Q.EXCLUDABLE.map(e => `<button type="button" class="chip-btn ${n.exclude.includes(e.v) ? 'on' : ''}" data-ex="${e.v}">${esc(e.l)}</button>`).join('')}</div>
         <p class="hint c">${['breakfast', 'lunch', 'dinner'].map(sl => `${Q.mealOptions(sl).length} ${sl}`).join(' · ')} recipes available with these choices.</p>`, next());
-    if (s === ST.mode) return shell('Last step', 'How hard should it push you?', '', `<div class="opts">${Object.entries(Q.MODES).map(([k, m]) => `<button class="opt mode ${o.mode === k ? 'on' : ''}" data-act="ob-mode" data-v="${k}">${ic(m.icon)}<div><b>${m.name}</b><small>${esc(m.desc)}</small></div></button>`).join('')}</div>`, `<button class="btn primary wide big" data-act="ob-analyze">Build my program</button>`);
+    if (s === ST.mode) return shell('Last step', 'How hard should it push you?', '', `<div class="opts">${Object.entries(Q.MODES).map(([k, m]) => `<button class="opt mode ${o.mode === k ? 'on' : ''}" data-act="ob-mode" data-v="${k}">${ic(m.icon)}<div><b>${m.name}</b><small>${esc(m.desc)}</small></div></button>`).join('')}</div>`, `<div class="fl">When do you start?</div>${seg('ob-start', [{ v: 'today', l: 'Today' }, { v: 'tomorrow', l: 'Tomorrow' }], o.start || 'tomorrow')}<button class="btn primary wide big" data-act="ob-analyze">Build my program</button>`);
     if (s === ST.analyze) return `<div class="ob-analyze"><div class="scan-orb">${Q.insignia(Q.RANKS[0], 70)}</div><div class="kicker">Building your program</div><div class="scan"><i></i></div><div class="scanlog" id="scanlog"></div></div>`;
     if (s === ST.results) {
       const a = o.a, base = Q.assess(a), keys = Q.STAT_ORDER.slice().sort((x, y) => base[x] - base[y]);
@@ -132,7 +132,7 @@
   }
 
   function finish() {
-    const o = Q.onb, S = Q.S, t = Q.today();
+    const o = Q.onb, S = Q.S, t = (o.start || 'tomorrow') === 'tomorrow' ? Q.addDays(Q.today(), 1) : Q.today();
     S.hero.name = o.name || 'Hero'; S.hero.mode = o.mode; S.hero.answers = o.a;
     S.hero.base = Q.assess(o.a); S.hero.why = o.why; S.hero.onboarded = true; S.hero.created = t;
     S.settings.threshold = Q.MODES[o.mode].threshold;
@@ -145,7 +145,7 @@
     setTimeout(() => {
       el.remove(); Q.onb = null; document.body.classList.remove('onb-on'); Q.ui.tab = 'today'; Q.render();
       const g = Q.game();
-      Q.showQueue([{ cls: 'lvl', html: `<div class="ovl-kicker">Day 1 · Phase 1</div><div class="ovl-stage">${Q.emblem(g, 130, 'big')}</div><h2>Foundation</h2>
+      Q.showQueue([{ cls: 'lvl', html: `<div class="ovl-kicker">${t > Q.today() ? 'Starts tomorrow' : 'Day 1 · Phase 1'}</div><div class="ovl-stage">${Q.emblem(g, 130, 'big')}</div><h2>Foundation</h2>
         <p>Your day is planned around your commitments. Win it by clearing enough quests to beat today's opponent.</p><p class="muted small">Tip: hold any quest for the 2-minute mini version.</p>`, btn: 'Let\'s go' }]);
     }, 600);
   }

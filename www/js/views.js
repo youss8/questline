@@ -147,6 +147,12 @@
 
   function viewToday() {
     const S = Q.S, g = Q.game(), d = Q.ui.date, t = Q.today(), edit = Q.ui.edit;
+    if (S.program.start && S.program.start > t && d === t && !edit) {
+      const n = Q.diffDays(S.program.start, t);
+      return `${topbar(g)}<section class="card note gold">${ic('hourglass')}<div><b>Day 1 starts ${n === 1 ? 'tomorrow' : 'in ' + n + ' days'}</b><p>Your quests, meals and opponent unlock on ${Q.niceDate(S.program.start, { weekday: 'long', day: 'numeric', month: 'long' })}. Tonight: check your plan, buy groceries, sleep on time.</p></div></section>
+        <div class="tools2"><button class="tile" data-act="tab" data-tab="plan">${ic('calendar-days')}<b>See your week</b><span>Commitments & free time</span></button><button class="tile" data-act="grocery">${ic('shopping-cart')}<b>Grocery list</b><span>For your first 7 days</span></button></div>
+        <button class="btn ghost wide" data-act="fuel-tomorrow">${ic('utensils')} Preview tomorrow's meals</button>`;
+    }
     const info = g.days[d] || Q.dayInfo(d), plan = Q.planDay(d);
     const byId = {}; info.items.forEach(it => { byId[it.q.id] = it; });
     const qt = Q.quoteFor(d);
@@ -489,6 +495,7 @@
         <div class="switchrow"><div><b>Sound effects</b></div><label class="sw"><input type="checkbox" data-set="sound" ${s.sound ? 'checked' : ''}><i></i></label></div>
         <div class="switchrow"><div><b>Haptics</b></div><label class="sw"><input type="checkbox" data-set="haptics" ${s.haptics ? 'checked' : ''}><i></i></label></div>
         <div class="field"><label>Currency symbol</label><input data-set="currency" maxlength="4" value="${esc(s.currency)}"></div></section>
+      ${Q.S.program.start && Q.S.program.start <= Q.today() ? `<section class="card"><b>Start date</b><p class="hint">Day 1 is ${Q.niceDate(Q.S.program.start)}.</p><button class="btn ghost wide" data-act="start-tomorrow">${ic('calendar')} Restart from tomorrow</button></section>` : ''}
       <section class="card"><b>Backup</b><p class="hint">Everything lives on this phone. Export now and then, and before switching phones.</p><div class="actions"><button class="btn ghost" data-act="export">${ic('download')} Export</button><button class="btn ghost" data-act="import">${ic('upload')} Import</button></div></section>
       <section class="card danger-card"><b>Start over</b><p class="hint">Retake the setup and build a new program. Wipes all progress on this phone.</p><button class="btn danger wide" data-act="reset">Reset everything</button></section>
       <p class="muted c small">Questline · fully offline · your data never leaves this phone</p>`;

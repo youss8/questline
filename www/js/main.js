@@ -255,6 +255,7 @@
       }
       case 'meal-swap': { Q.swapMeal(el.dataset.d, el.dataset.slot); Q.save(); Q.sfx('tap'); Q.render(); break; }
       case 'grocery': Q.grocerySheet(); break;
+      case 'fuel-tomorrow': Q.ui.fuelDate = Q.addDays(today, 1); goTab('fuel'); break;
       case 'guide': Q.guideSheet(id); break;
       case 'nutri-edit': Q.nutriSheet(); break;
       case 'nutri-save': {
@@ -357,6 +358,15 @@
       case 'reward-del': { const rid = Q.val('r-id'); Q.S.rewards = Q.S.rewards.filter(x => x.id !== rid); Q.save(); Q.closeSheet(); Q.render(); break; }
 
       case 'new-cycle': { const P = Q.S.program; P.cycles++; P.start = today; P.phaseShown = 1; Q.save(); Q.closeOverlay(); Q.render(); Q.toast(`Cycle ${P.cycles + 1} begins. Quests keep their levels.`); break; }
+      case 'start-tomorrow':
+        Q.confirm('Start tomorrow?', 'Day 1 moves to tomorrow. Anything logged today is cleared.', 'Start tomorrow', () => {
+          const S = Q.S, tm = Q.addDays(today, 1);
+          S.program.start = tm; S.program.phaseShown = 1; S.hero.created = tm;
+          S.quests.forEach(q => { if (q.since <= tm) { q.since = tm; q.lv = [{ d: tm, l: q.lv[q.lv.length - 1].l }]; } });
+          delete S.logs[today]; delete S.checkins[today]; delete S.bonus[today]; delete S.chests[today]; delete S.nutri.days[today];
+          Q.save(); Q.render(); Q.toast('Your program starts tomorrow. Rest up.');
+        });
+        break;
       case 'export': Q.exportBackup().then(ok => { if (ok) Q.toast('Backup ready'); }); break;
       case 'import': $('#importFile').click(); break;
       case 'reset':
@@ -418,6 +428,7 @@
         Q.retrain(); Q.save();
         if (Q.onb) Q.renderOnb(); else Q.render();
       }
+      else if (sid === 'ob-start' && Q.onb) { Q.onb.start = v; }
       else if (NSEG[sid]) { const [k, cast] = NSEG[sid]; Q.S.nutri[k] = cast(v); Q.save(); if (Q.onb) Q.renderOnb(); }
       else if (sid === 'mode') { Q.S.hero.mode = v; Q.S.settings.threshold = Q.mode().threshold; Q.save(); Q.toast(`${Q.mode().name} mode`); Q.render(); }
       return;
