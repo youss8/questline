@@ -58,7 +58,7 @@ public class PhoneCalendarPlugin extends Plugin {
     @PluginMethod
     public void list(PluginCall call) {
         if (!ok(call)) return;
-        long from = call.getLong("from", System.currentTimeMillis()), to = call.getLong("to", from + 14L * 864e5L);
+        long from = call.getLong("from", System.currentTimeMillis()), to = call.getLong("to", from + 14L * 86400000L);
         Uri.Builder b = CalendarContract.Instances.CONTENT_URI.buildUpon();
         ContentUris.appendId(b, from); ContentUris.appendId(b, to);
         String[] p = { CalendarContract.Instances.TITLE, CalendarContract.Instances.BEGIN, CalendarContract.Instances.END, CalendarContract.Instances.ALL_DAY, CalendarContract.Instances.EVENT_ID };
@@ -92,7 +92,7 @@ public class PhoneCalendarPlugin extends Plugin {
         v.put(CalendarContract.Events.EVENT_TIMEZONE, allDay ? "UTC" : TimeZone.getDefault().getID());
         String rrule = call.getString("rrule");
         if (rrule != null && !rrule.isEmpty()) { v.put(CalendarContract.Events.RRULE, rrule); v.put(CalendarContract.Events.DURATION, allDay ? "P1D" : "PT1H"); v.putNull(CalendarContract.Events.DTEND); }
-        else { v.put(CalendarContract.Events.DTEND, start + (allDay ? 864e5L : 36e5L)); v.putNull(CalendarContract.Events.RRULE); v.putNull(CalendarContract.Events.DURATION); }
+        else { v.put(CalendarContract.Events.DTEND, start + (allDay ? 86400000L : 3600000L)); v.putNull(CalendarContract.Events.RRULE); v.putNull(CalendarContract.Events.DURATION); }
         ContentResolver cr = getContext().getContentResolver();
         long id = map().getLong(key, -1);
         try {
