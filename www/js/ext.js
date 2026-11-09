@@ -133,6 +133,8 @@
     const cal = Q.calToday ? Q.calToday() : null;
     let html = '';
     if (cal) html += `<div class="li" data-act="tab" data-tab="body">${Q.ring(cal.eaten / Math.max(1, cal.target), { size: 54, stroke: 12, label: '', over: cal.eaten > cal.target })}<div class="li-m"><b>${Math.max(0, cal.target - cal.eaten)} kcal left</b><small>${cal.eaten} eaten · protein ${cal.p}/${cal.pt} g</small></div>${ic('chevron-right', 'chev')}</div>`;
+    const ht = Q.healthToday ? Q.healthToday() : null;
+    if (ht && ht.sleep) html += Q.li({ icon: 'moon-star', color: '#a78bfa', title: `Slept ${Math.floor(ht.sleep / 60)}h ${Q.pad(ht.sleep % 60)}m`, sub: 'From Samsung Health' });
     const nt = Q.nextWorkout ? Q.nextWorkout() : null;
     if (nt) html += Q.li({ icon: 'dumbbell', color: '#22d3ee', title: nt, sub: 'Next workout', act: 'tab', attrs: 'data-tab="body"', right: ic('chevron-right', 'chev') });
     for (const e of (Q.phoneToday ? Q.phoneToday() : [])) parts.push(Q.li({ icon: 'calendar', color: '#38bdf8', title: esc(e.title), sub: `Calendar${e.time ? ' · ' + e.time : ' · all day'}` }));
@@ -143,4 +145,60 @@
     if (!html && !parts.length) return manage;
     return `<div class="sec"><span>Also today</span></div><section class="card">${html}${parts.join('')}</section>${manage}`;
   };
+})(window.Q);
+
+(function (Q) {
+  'use strict';
+  // ---------- choose the real start day ----------
+  Q.setStart = d => {
+    const S = Q.S, t = Q.today();
+    if (!d || d < t) { Q.toast('Pick today or a later day'); return; }
+    Q.confirm(`Start on ${Q.niceDate(d, { weekday: 'long', day: 'numeric', month: 'long' })}?`, d === t ? 'Day 1 is today.' : 'Day 1 moves to that day. Habits logged from today until then are cleared.', 'Set start day', () => {
+      S.program.start = d; S.program.phaseShown = 1; S.hero.created = d < S.hero.created ? d : (S.hero.created > t ? d : S.hero.created);
+      if (S.hero.created > d) S.hero.created = d;
+      S.quests.forEach(q => { if (q.since >= t || q.since <= d) { q.since = d; q.lv = [{ d, l: q.lv[q.lv.length - 1].l }]; } });
+      for (let x = t; x < d; x = Q.addDays(x, 1)) { delete S.logs[x]; delete S.bonus[x]; delete S.chests[x]; delete S.nutri.days[x]; }
+      Q.save(); Q.ui.date = t; Q.render(); Q.toast(d === t ? 'Day 1 is today. Go!' : `Day 1: ${Q.niceDate(d)}`);
+    });
+  };
+  Q.ACTS['set-start'] = () => Q.setStart(Q.val('set-start'));
+  Q.ACTS['start-quick'] = el => Q.setStart(Q.addDays(Q.today(), +el.dataset.n));
+  document.addEventListener('change', e => { if (e.target.id === 'ob-date' && Q.onb) { Q.onb.date = e.target.value; Q.onb.start = 'date'; const b = document.querySelector('[data-seg="ob-start"] [data-v="date"]'); if (b) { b.parentElement.querySelectorAll('button').forEach(z => z.classList.toggle('on', z === b)); } } });
+})(window.Q);
+(function (Q) {
+  'use strict';
+  // ---------- Today: four rings that summarise the day at a glance ----------
+  Q.todayRings = info => {
+    const c = Q.calToday ? Q.calToday() : null, h = Q.healthToday ? Q.healthToday() : null;
+    const sq = Q.S.quests.find(q => q.key === 'steps' && Q.activeOn(q, Q.today()));
+    const stepGoal = sq ? Q.target(sq, Q.today()) : 8000, steps = h && h.steps != null ? h.steps : (sq ? (typeof Q.getLog(Q.today(), sq.id) === 'number' ? Q.getLog(Q.today(), sq.id) : 0) : null);
+    const wq = Q.S.quests.find(q => q.key === 'water' && Q.activeOn(q, Q.today())), wv = wq ? Q.getLog(Q.today(), wq.id) : null;
+    const cell = (p, label, sub, c1, c2, act, tab) => `<button class="rcell" data-act="${act}" ${tab ? `data-tab="${tab}"` : ''}>${Q.ring(p, { size: 70, stroke: 11, label, c1, c2 })}<small>${sub}</small></button>`;
+    const fmtK = n => n >= 1000 ? (Math.round(n / 100) / 10) + 'k' : n;
+    return `<section class="rings4">
+      ${cell(info.total ? info.done / info.total : 0, `${info.done}/${info.total}`, 'Habits', '#8b7cff', '#c4b5fd', 'go-today')}
+      ${c ? cell(c.eaten / Math.max(1, c.target), fmtK(Math.max(0, c.target - c.eaten)), 'kcal left', '#fbbf24', '#f472b6', 'tab', 'body') : ''}
+      ${steps != null ? cell(steps / Math.max(1, stepGoal), fmtK(steps), 'Steps', '#34d399', '#22d3ee', 'tab', 'body') : ''}
+      ${wq ? cell((typeof wv === 'number' ? wv : 0) / Q.target(wq, Q.today()), `${typeof wv === 'number' ? wv : 0}`, 'Water', '#38bdf8', '#22d3ee', 'go-today') : ''}
+    </section>`;
+  };
+})(window.Q);
+(function (Q) {
+  'use strict';
+  // ---------- one tap: the 8 starter habits picked for Youssef ----------
+  const REC = ['teeth', 'water', 'steps', 'sleep', 'mobility', 'german', 'career', 'nophoneam'];
+  const missing = () => REC.filter(k => Q.CATALOG[k] && !Q.S.quests.some(q => q.key === k && !q.until));
+  Q.recHabitsCard = () => {
+    const m = missing(); if (!m.length || !Q.S.hero.onboarded) return '';
+    return `<section class="card" style="border-color:rgba(139,124,255,.45)"><div class="card-h"><div><div class="kicker">Recommended for you</div><b>${m.length} starter habit${m.length === 1 ? '' : 's'} not added yet</b></div></div>
+      <div class="pill-row">${m.map(k => `<span class="chip">${Q.ic(Q.CATALOG[k].icon)} ${Q.esc(String(Q.CATALOG[k].name).replace('{n}', Q.CATALOG[k].tiers[0]))}</span>`).join('')}</div>
+      <button class="btn primary wide" data-act="rec-add" style="margin-top:12px">${Q.ic('plus')} Add ${m.length === 1 ? 'it' : 'all ' + m.length}</button></section>`;
+  };
+  Q.ACTS['rec-add'] = () => {
+    const t = Q.today(), since = Q.S.program.start && Q.S.program.start > t ? Q.S.program.start : t, b = Q.game();
+    for (const k of missing()) Q.S.quests.push(Q.buildQuest(k, Q.S.hero.answers, Q.S.hero.mode || 'normal', since));
+    Q.save(); Q.toast('Habits added. Start small, never miss twice.'); Q.afterChange(b);
+  };
+  const te = Q.todayExtra;
+  Q.todayExtra = () => Q.recHabitsCard() + te();
 })(window.Q);

@@ -54,7 +54,7 @@
 
   function foodsView() {
     const x = X();
-    return `<section class="card"><div class="card-h"><b>My foods</b><button class="plus gold" data-act="myfood-new">${ic('plus')}</button></div>
+    return `<section class="card"><div class="card-h"><b>My foods</b><button class="plus gold" data-act="myfood-new" data-manual="1">${ic('plus')}</button></div>
       ${x.myFoods.map(f => Q.li({ title: esc(f.n), sub: `${r0(f.k)} kcal · ${r0(f.p)} p / 100 g${f.unit ? ` · portion ${f.unit} g` : ''}`, right: `<button class="x-del" data-act="myfood-del" data-id="${f.id}">${ic('x')}</button>` })).join('') || '<p class="empty">Add packaged foods using the label on the pack. They stay forever.</p>'}</section>
       <section class="card"><div class="card-h"><b>Saved meals</b></div>
       ${x.saved.map(m => Q.li({ title: esc(m.n), sub: `${m.items.length} foods · ${r0(m.items.reduce((a, e) => a + entryMacros(e).k, 0))} kcal`, right: `<button class="x-del" data-act="saved-del" data-id="${m.id}">${ic('x')}</button>` })).join('') || '<p class="empty">Log a day, then tap "Save today\'s foods as a meal" for one-tap logging.</p>'}</section>
@@ -74,10 +74,10 @@
   Q.foodPicker = slot => {
     const x = X();
     Q.sheet(`<h3>Add to ${SLOTS.find(s => s[0] === slot)[1]}</h3>
-      <input id="fs-q" placeholder="Search foods, dishes, recipes…" autocomplete="off">
+      <div class="addbar"><input id="fs-q" placeholder="Search foods, dishes, recipes…" autocomplete="off">${Q.canScan && Q.canScan() ? `<button class="btn" data-act="scan-food" data-slot="${slot}" aria-label="Scan barcode">${ic('scan-barcode')}</button>` : ''}</div>
       ${x.saved.length ? `<div class="sec"><span>Saved meals</span></div><div class="pill-row">${x.saved.map(m => `<button class="chip gold" data-act="saved-log" data-id="${m.id}" data-slot="${slot}">${ic('zap')} ${esc(m.n)}</button>`).join('')}</div>` : ''}
       <div id="fs-res" style="max-height:52vh;overflow:auto;margin-top:8px"></div>
-      <button class="btn ghost wide" data-act="myfood-new">${ic('plus')} Food not here? Add it from the label</button>`, { full: true });
+      <button class="btn ghost wide" data-act="myfood-new" data-manual="1">${ic('plus')} Food not here? Add it from the label</button>`, { full: true });
     const box = document.getElementById('fs-res'), inp = document.getElementById('fs-q');
     const paint = () => {
       const q = inp.value.trim().toLowerCase();
@@ -109,15 +109,18 @@
   Q.ACTS['food-del'] = el => { const [id, t] = el.dataset.id.split('|'), d = Q.ui.fuelDate || Q.today(), x = X(); x.diary[d] = (x.diary[d] || []).filter(e => !(e.id === id && String(e.t) === t)); if (!x.diary[d].length) delete x.diary[d]; Q.save(); Q.render(); };
   Q.ACTS['fd-prev'] = () => { Q.ui.fuelDate = Q.addDays(Q.ui.fuelDate || Q.today(), -1); Q.render(); };
   Q.ACTS['fd-next'] = () => { const d = Q.ui.fuelDate || Q.today(); if (d < Q.today()) { Q.ui.fuelDate = Q.addDays(d, 1); Q.render(); } };
-  Q.ACTS['myfood-new'] = () => Q.sheet(`<h3>Add your own food</h3><p class="muted small">Copy the numbers from the label (per 100 g).</p>
+  Q.foodByBarcode = code => X().myFoods.find(f => f.barcode === code);
+  Q.ACTS['myfood-new'] = el => { if (el && el.dataset && el.dataset.manual) Q.ui.barcode = null; Q.sheet(`<h3>Add your own food</h3><p class="muted small">Copy the numbers from the label (per 100 g).</p>
+    ${Q.ui.barcode ? `<p class="chip gold">${ic('scan-barcode')} Barcode ${esc(Q.ui.barcode)} · saved with this food</p>` : ''}
     ${Q.field('Name', '<input id="mf-n" placeholder="e.g. Protein bar, local brand">')}
     <div class="sgrid">${Q.field('kcal', '<input id="mf-k" type="number" inputmode="decimal">')}${Q.field('Protein g', '<input id="mf-p" type="number" inputmode="decimal">')}${Q.field('Carbs g', '<input id="mf-c" type="number" inputmode="decimal">')}${Q.field('Fat g', '<input id="mf-f" type="number" inputmode="decimal">')}</div>
     <div class="sgrid">${Q.field('Portion (g, optional)', '<input id="mf-u" type="number" inputmode="decimal" placeholder="e.g. 45">')}${Q.field('Portion name', '<input id="mf-un" placeholder="bar">')}</div>
-    <div class="actions"><button class="btn primary wide" data-act="myfood-save">Save food</button></div>`);
+    <div class="actions"><button class="btn primary wide" data-act="myfood-save">Save food</button></div>`); };
   Q.ACTS['myfood-save'] = () => {
     const n = Q.val('mf-n').trim(), k = parseFloat(Q.val('mf-k')); if (!n || !(k >= 0)) { Q.toast('Name and kcal are needed'); return; }
-    X().myFoods.push({ id: Q.uid(), n, k, p: +Q.val('mf-p') || 0, c: +Q.val('mf-c') || 0, f: +Q.val('mf-f') || 0, unit: +Q.val('mf-u') || null, uname: Q.val('mf-un').trim() || 'portion' });
+    X().myFoods.push({ id: Q.uid(), n, k, p: +Q.val('mf-p') || 0, c: +Q.val('mf-c') || 0, f: +Q.val('mf-f') || 0, unit: +Q.val('mf-u') || null, uname: Q.val('mf-un').trim() || 'portion', barcode: Q.ui.barcode || null }); const slot = Q.ui.scanSlot; Q.ui.barcode = null;
     Q.save(); Q.closeSheet(); Q.toast('Saved to My foods'); Q.render();
+    if (slot) { Q.ui.scanSlot = null; const f = X().myFoods[X().myFoods.length - 1]; const el = document.createElement('i'); el.dataset.id = 'my:' + f.id; el.dataset.slot = slot; Q.ACTS['food-pick'](el); }
   };
   Q.ACTS['myfood-del'] = el => { const x = X(); x.myFoods = x.myFoods.filter(f => f.id !== el.dataset.id); Q.save(); Q.render(); };
   Q.ACTS['save-day-meal'] = () => {
@@ -260,7 +263,7 @@
     const last = W[W.length - 1], first = W[0], wk = W.filter(w => Q.diffDays(Q.today(), w.d) <= 7);
     const T = Q.targets ? Q.targets() : null;
     const latestM = {}; for (const m of x.measures) latestM[m.k] = m;
-    return `<section class="card"><div class="card-h"><div><div class="kicker">Weight</div><div class="disp huge">${last ? last.kg : '—'}<span class="muted" style="font-size:16px"> kg</span></div></div><button class="btn primary" data-act="weigh">${ic('scale')} Log</button></div>
+    return `${Q.healthCard ? Q.healthCard() : ''}<section class="card"><div class="card-h"><div><div class="kicker">Weight</div><div class="disp huge">${last ? last.kg : '—'}<span class="muted" style="font-size:16px"> kg</span></div></div><button class="btn primary" data-act="weigh">${ic('scale')} Log</button></div>
         ${last && first && last !== first ? `<p class="small ${last.kg <= first.kg ? 'good' : 'bad'}">${last.kg <= first.kg ? '▼' : '▲'} ${Math.abs(Math.round((last.kg - first.kg) * 10) / 10)} kg since ${Q.niceDate(first.d)}</p>` : ''}
         ${Q.spark(W.slice(-30).map(w => w.kg), { h: 110 })}
         ${T ? `<div class="kpis" style="margin-top:10px"><div class="kpi"><small>BMI</small><b>${T.bmi}</b></div><div class="kpi"><small>Daily target</small><b>${T.kcal}</b></div><div class="kpi"><small>Weekly pace</small><b>${T.weekly} kg</b></div></div>` : ''}

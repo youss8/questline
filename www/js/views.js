@@ -155,7 +155,7 @@
     }
     const info = g.days[d] || Q.dayInfo(d), plan = Q.planDay(d);
     const byId = {}; info.items.forEach(it => { byId[it.q.id] = it; });
-    const qt = Q.quoteFor(d);
+    const mq = d === Q.today() && Q.moodQuote ? Q.moodQuote() : null, qt = mq ? { c: mq[0], t: mq[1] } : Q.quoteFor(d);
     let body = '';
     if (edit) {
       const all = Q.editList(d);
@@ -179,6 +179,7 @@
         <p class="hint c">Hold any quest for the mini version, skip, reminder or edit.</p>`;
     }
     return `${topbar(g)}
+      ${d === t && !edit && Q.todayRings ? Q.todayRings(info) : ''}
       ${programStrip()}
       ${d === t && !edit ? checkinCard(d) : ''}
       ${info.comeback && d === t && !info.defeated ? `<section class="card note warm">${ic('refresh-cw')}<div><b>Comeback day</b><p>You slipped yesterday. Never miss twice: win today for +40 XP and a fresh streak.</p></div></section>` : ''}
@@ -496,7 +497,9 @@
         <div class="switchrow"><div><b>Sound effects</b></div><label class="sw"><input type="checkbox" data-set="sound" ${s.sound ? 'checked' : ''}><i></i></label></div>
         <div class="switchrow"><div><b>Haptics</b></div><label class="sw"><input type="checkbox" data-set="haptics" ${s.haptics ? 'checked' : ''}><i></i></label></div>
         <div class="field"><label>Currency symbol</label><input data-set="currency" maxlength="4" value="${esc(s.currency)}"></div></section>
-      ${Q.S.program.start && Q.S.program.start <= Q.today() ? `<section class="card"><b>Start date</b><p class="hint">Day 1 is ${Q.niceDate(Q.S.program.start)}.</p><button class="btn ghost wide" data-act="start-tomorrow">${ic('calendar')} Restart from tomorrow</button></section>` : ''}
+      <section class="card"><b>Start date</b><p class="hint">${Q.S.program.start ? `Day 1 ${Q.S.program.start > Q.today() ? 'will be' : 'is'} ${Q.niceDate(Q.S.program.start, { weekday: 'long', day: 'numeric', month: 'long' })}.` : 'Not set yet.'} Pick any day from today on. Logs from today until then are cleared.</p>
+        <div class="addbar"><input type="date" id="set-start" min="${Q.today()}" value="${Q.S.program.start && Q.S.program.start >= Q.today() ? Q.S.program.start : Q.addDays(Q.today(), 1)}"><button class="btn primary" data-act="set-start">${ic('calendar-check')} Set</button></div>
+        <div class="pill-row" style="margin-top:8px"><button class="chip" data-act="start-quick" data-n="0">Today</button><button class="chip" data-act="start-quick" data-n="1">Tomorrow</button><button class="chip" data-act="start-quick" data-n="2">Day after</button><button class="chip" data-act="start-quick" data-n="7">In a week</button></div></section>
       <section class="card"><b>Backup</b><p class="hint">Everything lives on this phone. Export now and then, and before switching phones.</p><div class="actions"><button class="btn ghost" data-act="export">${ic('download')} Export</button><button class="btn ghost" data-act="import">${ic('upload')} Import</button></div></section>
       <section class="card danger-card"><b>Start over</b><p class="hint">Retake the setup and build a new program. Wipes all progress on this phone.</p><button class="btn danger wide" data-act="reset">Reset everything</button></section>
       <p class="muted c small">Questline · fully offline · your data never leaves this phone</p>`;

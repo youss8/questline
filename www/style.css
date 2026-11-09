@@ -603,3 +603,23 @@ details.gram p { color: var(--muted); font-size: 13.5px; margin-top: 8px; }
 .heat-k i[data-l="1"] { background: rgba(139,124,255,.3); } .heat-k i[data-l="2"] { background: rgba(139,124,255,.55); } .heat-k i[data-l="3"] { background: #8b7cff; } .heat-k i[data-l="4"] { background: #22d3ee; }
 .li[data-act] { cursor: pointer; }
 .fab-space { height: 76px; }
+/* barcode scanning: camera renders behind the web view */
+body.scanning, body.scanning html { background: transparent !important; }
+html:has(body.scanning) { background: transparent !important; }
+body.scanning #app, body.scanning #nav, body.scanning .fab, body.scanning #toast { visibility: hidden; }
+#scan-ui { position: fixed; inset: 0; z-index: 99; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px; color: #fff; background: radial-gradient(transparent 38%, rgba(0,0,0,.55) 39%); }
+#scan-ui p { font-weight: 600; text-shadow: 0 2px 8px #000; }
+.scan-frame { width: 260px; height: 160px; border-radius: 22px; border: 3px solid #22d3ee; box-shadow: 0 0 0 2px rgba(139,124,255,.6), 0 0 40px rgba(34,211,238,.5); position: relative; overflow: hidden; }
+.scan-frame i { position: absolute; left: 0; right: 0; height: 2px; background: #22d3ee; box-shadow: 0 0 12px #22d3ee; animation: scanline 1.6s ease-in-out infinite alternate; }
+@keyframes scanline { from { top: 8%; } to { top: 92%; } }
+/* health step bars */
+.bars7 { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; height: 90px; margin: 14px 0 8px; align-items: end; }
+.bars7 div { display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end; }
+.bars7 i { width: 100%; border-radius: 8px; background: var(--s4); display: block; }
+.bars7 i.hit { background: var(--grad); }
+.bars7 span { font-size: 10.5px; color: var(--dim); }
+.rings4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: 0 0 14px; padding: 14px 8px 10px; border-radius: var(--r); background: linear-gradient(160deg, rgba(139,124,255,.14), rgba(34,211,238,.06) 60%, rgba(14,16,22,.5)); border: 1px solid var(--line); }
+.rcell { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.rcell .ring .rv b { font-size: 15px; }
+.rcell small { font-size: 11.5px; color: var(--muted); font-weight: 600; }
+.li-m small { display: block; }

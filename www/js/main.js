@@ -524,6 +524,7 @@
   if (Q.S.settings.remindersOn) Q.rescheduleNotifications();
   if (Q.initWidgets) Q.initWidgets();
   if (Q.initCalendar) Q.initCalendar();
+  if (Q.initHealth) Q.initHealth();
   if ('serviceWorker' in navigator && !Q.isNative() && /^https?:/.test(location.protocol)) navigator.serviceWorker.register('sw.js').catch(() => { /* optional */ });
   window.__Q = Q;
 })(window.Q);
