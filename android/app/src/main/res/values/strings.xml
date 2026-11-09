@@ -4,4 +4,8 @@
     <string name="title_activity_main">Questline</string>
     <string name="package_name">com.youssef.questline</string>
     <string name="custom_url_scheme">com.youssef.questline</string>
+    <string name="w_today">Tick today's habits from your home screen</string>
+    <string name="w_fuel">Calories and protein left today</string>
+    <string name="w_next">Your next habit, meal or commitment</string>
+    <string name="w_quote">Quote of the day, level and streak</string>
 </resources>

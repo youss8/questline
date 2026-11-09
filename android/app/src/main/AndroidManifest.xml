@@ -20,6 +20,32 @@
             </intent-filter>
         </activity>
 
+        <receiver android:name=".TodayWidget" android:exported="false" android:label="Questline · Today">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.youssef.questline.TOGGLE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_today" />
+        </receiver>
+        <receiver android:name=".FuelWidget" android:exported="false" android:label="Questline · Fuel">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_fuel" />
+        </receiver>
+        <receiver android:name=".NextWidget" android:exported="false" android:label="Questline · Next up">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_next" />
+        </receiver>
+        <receiver android:name=".QuoteWidget" android:exported="false" android:label="Questline · Quote">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_quote" />
+        </receiver>
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"

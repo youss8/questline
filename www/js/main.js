@@ -522,6 +522,7 @@
   if (!Q.S.hero.onboarded) Q.startOnboarding(); else onOpen();
   Q.checkTimer();
   if (Q.S.settings.remindersOn) Q.rescheduleNotifications();
+  if (Q.initWidgets) Q.initWidgets();
   if ('serviceWorker' in navigator && !Q.isNative() && /^https?:/.test(location.protocol)) navigator.serviceWorker.register('sw.js').catch(() => { /* optional */ });
   window.__Q = Q;
 })(window.Q);

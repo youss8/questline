@@ -73,6 +73,7 @@
     // reminders depend on progress (e.g. evening warning only if the monster is alive), so refresh them after changes
     clearTimeout(notifTimer);
     notifTimer = setTimeout(() => { if (Q.rescheduleNotifications) Q.rescheduleNotifications(); }, 1500);
+    if (Q.pushWidgets) Q.pushWidgets();
   };
   Q.replaceState = d => { Q.S = Q.normalize(d); Q.save(); };
 

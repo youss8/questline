@@ -65,6 +65,10 @@
     gratitude: { name: 'Write {n} wins from today', icon: 'notebook-pen', stat: 'wis', diff: 1, type: 'check', tiers: [1, 3, 3, 5], when: 'bed', dur: 5, mini: 'Say one win out loud' },
     sun: { name: 'Morning daylight · {n} min', icon: 'sun', stat: 'vit', diff: 1, type: 'check', tiers: [5, 10, 10, 15], when: 'morning', dur: 'n', mini: 'Stand by an open window for a minute' },
     tidy: { name: 'Reset your space · {n} min', icon: 'sparkles', stat: 'dis', diff: 1, type: 'check', tiers: [5, 10, 15, 15], when: 'evening', dur: 'n', mini: 'Put away three things' },
+    teeth: { name: 'Brush teeth morning & night', icon: 'brush', stat: 'vit', diff: 1, type: 'count', unit: 'times', tiers: [2], when: 'allday', mini: 'Brush once, even if it is late' },
+    mobility: { name: 'Mobility · {n} min (back, hips, knees)', icon: 'person-standing', stat: 'vit', diff: 2, type: 'check', tiers: [10, 10, 15, 20], when: 'anytime', dur: 'n', mini: 'Two minutes: cat-cow, hip flexor stretch, chin tucks' },
+    german: { name: 'German · {n} min', icon: 'languages', stat: 'wis', diff: 2, type: 'check', tiers: [15, 20, 30, 45], when: 'anytime', dur: 'n', mini: 'Review 10 flashcards' },
+    career: { name: 'Career growth · {n} min', icon: 'rocket', stat: 'wea', diff: 2, type: 'check', tiers: [20, 30, 45, 60], when: 'evening', dur: 'n', mini: 'Read one page of docs or fix one CV line' },
     nosugar: { name: 'No sugary drinks or sweets', icon: 'candy-off', stat: 'vit', diff: 2, type: 'check', tiers: [0], when: 'allday', mini: 'Skip sugar in one drink' }
   };
 
