@@ -2,19 +2,19 @@
   'use strict';
 
   Q.STATS = {
-    str: { name: 'Strength', short: 'STR', icon: 'dumbbell', color: '#e8765f' },
-    vit: { name: 'Vitality', short: 'VIT', icon: 'heart-pulse', color: '#4cc38a' },
-    wis: { name: 'Wisdom', short: 'WIS', icon: 'brain', color: '#5aa9e6' },
-    foc: { name: 'Focus', short: 'FOC', icon: 'crosshair', color: '#9b8afb' },
-    dis: { name: 'Discipline', short: 'DIS', icon: 'shield', color: '#e0a458' },
-    wea: { name: 'Wealth', short: 'WEA', icon: 'coins', color: '#d6bb63' }
+    str: { name: 'Strength', short: 'STR', icon: 'dumbbell', color: '#f472b6' },
+    vit: { name: 'Vitality', short: 'VIT', icon: 'heart-pulse', color: '#34d399' },
+    wis: { name: 'Wisdom', short: 'WIS', icon: 'brain', color: '#38bdf8' },
+    foc: { name: 'Focus', short: 'FOC', icon: 'crosshair', color: '#22d3ee' },
+    dis: { name: 'Discipline', short: 'DIS', icon: 'shield', color: '#fbbf24' },
+    wea: { name: 'Wealth', short: 'WEA', icon: 'coins', color: '#a78bfa' }
   };
   Q.STAT_ORDER = ['str', 'vit', 'wis', 'foc', 'dis', 'wea'];
 
   Q.DIFF = {
-    1: { name: 'Easy', xp: 10, side: 30, color: '#4cc38a' },
-    2: { name: 'Medium', xp: 20, side: 60, color: '#d6bb63' },
-    3: { name: 'Hard', xp: 30, side: 100, color: '#e8765f' }
+    1: { name: 'Easy', xp: 10, side: 30, color: '#34d399' },
+    2: { name: 'Medium', xp: 20, side: 60, color: '#a78bfa' },
+    3: { name: 'Hard', xp: 30, side: 100, color: '#f472b6' }
   };
 
   Q.MODES = {
@@ -24,12 +24,12 @@
   };
 
   Q.RANKS = [
-    { r: 'I', from: 1, name: 'Recruit', color: '#8b93a7', chev: 1 },
-    { r: 'II', from: 5, name: 'Operator', color: '#6aa6d8', chev: 2 },
-    { r: 'III', from: 10, name: 'Specialist', color: '#4fc1b0', chev: 3 },
-    { r: 'IV', from: 15, name: 'Veteran', color: '#a48bf2', chev: 3, star: 1 },
-    { r: 'V', from: 22, name: 'Elite', color: '#e0a458', chev: 3, star: 2 },
-    { r: 'VI', from: 30, name: 'Legend', color: '#f1d27a', chev: 3, star: 3 }
+    { r: 'I', from: 1, name: 'Recruit', color: '#8f95ab', chev: 1 },
+    { r: 'II', from: 5, name: 'Operator', color: '#38bdf8', chev: 2 },
+    { r: 'III', from: 10, name: 'Specialist', color: '#22d3ee', chev: 3 },
+    { r: 'IV', from: 15, name: 'Veteran', color: '#a78bfa', chev: 3, star: 1 },
+    { r: 'V', from: 22, name: 'Elite', color: '#c084fc', chev: 3, star: 2 },
+    { r: 'VI', from: 30, name: 'Legend', color: '#f0abfc', chev: 3, star: 3 }
   ];
   Q.rankFor = l => { let i = 0; Q.RANKS.forEach((x, j) => { if (l >= x.from) i = j; }); return { ...Q.RANKS[i], i }; };
 
@@ -96,12 +96,12 @@
     { k: 'hustle', q: 'Do you have a side hustle?', o: ['Yes, I\'m working on one', 'I want to start one', 'Not interested'] }
   ];
   Q.BLOCK_TYPES = {
-    work: { name: 'Work', icon: 'briefcase', color: '#5aa9e6' },
-    study: { name: 'Class / study', icon: 'graduation-cap', color: '#9b8afb' },
+    work: { name: 'Work', icon: 'briefcase', color: '#38bdf8' },
+    study: { name: 'Class / study', icon: 'graduation-cap', color: '#22d3ee' },
     commute: { name: 'Commute', icon: 'car', color: '#8b93a7' },
-    family: { name: 'Family / social', icon: 'users', color: '#4cc38a' },
-    faith: { name: 'Faith / community', icon: 'landmark', color: '#d6bb63' },
-    other: { name: 'Other', icon: 'calendar', color: '#e8765f' }
+    family: { name: 'Family / social', icon: 'users', color: '#34d399' },
+    faith: { name: 'Faith / community', icon: 'landmark', color: '#a78bfa' },
+    other: { name: 'Other', icon: 'calendar', color: '#f472b6' }
   };
   Q.DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   Q.DAY_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];

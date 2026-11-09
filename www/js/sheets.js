@@ -171,7 +171,7 @@
           el.querySelector('#flip').classList.add('open');
           Q.sfx('chest'); Q.buzz([15, 30, 50]);
           setTimeout(() => {
-            Q.burstAt(el.querySelector('.flip'), { n: loot.rarity === 'legendary' ? 50 : 28, speed: 5, colors: loot.rarity === 'epic' ? ['#c4b1ff', '#9b8afb', '#fff'] : loot.rarity === 'rare' ? ['#9fd0f5', '#5aa9e6', '#fff'] : loot.rarity === 'common' ? ['#c9ced8', '#8d94a3'] : undefined });
+            Q.burstAt(el.querySelector('.flip'), { n: loot.rarity === 'legendary' ? 50 : 28, speed: 5, colors: loot.rarity === 'epic' ? ['#c4b1ff', '#22d3ee', '#fff'] : loot.rarity === 'rare' ? ['#9fd0f5', '#38bdf8', '#fff'] : loot.rarity === 'common' ? ['#c9ced8', '#8d94a3'] : undefined });
             el.querySelector('#creveal').innerHTML = `<div class="rarity r-${loot.rarity}">${loot.rarity}</div><h2>${esc(loot.name)}</h2><button class="btn primary wide big" data-act="ovl-close">Collect</button>`;
           }, 380);
           Q.S.chests[d] = true; Q.save();
@@ -250,8 +250,8 @@
     const h = Q.S.hustles.find(x => x.id === id); if (!h) return;
     const earned = sum(h.entries), goal = h.goal || 0, p = goal ? Q.pct(earned, goal) : 0;
     const entries = h.entries.slice().sort((a, b) => (b.d || '').localeCompare(a.d || '')).slice(0, 8);
-    Q.sheet(`<div class="shead"><div class="ico" style="--sc:#d6bb63">${ic(h.icon)}</div><div><h3>${esc(h.name)}</h3><div class="sub"><span>${goal ? `${p}% of ${money(goal)}` : 'No goal set'}</span></div></div></div>
-      <div class="bigmoney disp">${money(earned)}</div>${goal ? `<div class="bar" style="--c:#d6bb63"><i style="width:${p}%"></i></div>` : ''}
+    Q.sheet(`<div class="shead"><div class="ico" style="--sc:#a78bfa">${ic(h.icon)}</div><div><h3>${esc(h.name)}</h3><div class="sub"><span>${goal ? `${p}% of ${money(goal)}` : 'No goal set'}</span></div></div></div>
+      <div class="bigmoney disp">${money(earned)}</div>${goal ? `<div class="bar" style="--c:#a78bfa"><i style="width:${p}%"></i></div>` : ''}
       <div class="sec"><span>Steps · +15 XP each</span><span>${h.tasks.filter(x => x.done).length}/${h.tasks.length}</span></div>
       <div class="steps">${h.tasks.map((x, i) => `<div class="step ${x.done ? 'done' : ''}" data-act="htask" data-id="${id}" data-i="${i}"><span class="box"></span><span class="st">${esc(x.t)}</span><button class="mini" data-act="htask-del" data-id="${id}" data-i="${i}" aria-label="Remove">${ic('x')}</button></div>`).join('') || '<p class="empty sm">Break it into small moves.</p>'}</div>
       <div class="addrow"><input id="ht-new" placeholder="Add a step…" maxlength="80"><button class="btn primary" data-act="htask-add" data-id="${id}">Add</button></div>

@@ -378,7 +378,7 @@
       case 'confirm-yes': { const cb = Q._confirmCb; Q._confirmCb = null; Q.closeSheet(); if (cb) cb(); break; }
       case 'sheet-close': Q.closeSheet(); break;
       case 'ovl-close': Q.closeOverlay(); break;
-      default: break;
+      default: if (Q.extAct) Q.extAct(a, el); break;
     }
   }
 
@@ -523,6 +523,7 @@
   Q.checkTimer();
   if (Q.S.settings.remindersOn) Q.rescheduleNotifications();
   if (Q.initWidgets) Q.initWidgets();
+  if (Q.initCalendar) Q.initCalendar();
   if ('serviceWorker' in navigator && !Q.isNative() && /^https?:/.test(location.protocol)) navigator.serviceWorker.register('sw.js').catch(() => { /* optional */ });
   window.__Q = Q;
 })(window.Q);

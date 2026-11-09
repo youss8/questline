@@ -28,7 +28,7 @@
     cx.globalAlpha = 1;
     raf = parts.length ? requestAnimationFrame(loop) : 0;
   }
-  const GOLD = ['#f0d394', '#d4af6a', '#fff3d6', '#c4954a'];
+  const GOLD = ['#c4b5fd', '#8b7cff', '#fff3d6', '#c4954a'];
   Q.burst = (x, y, opts) => {
     if (reduced()) return;
     ensure();
@@ -138,7 +138,7 @@
     const p = Math.max(0.02, Math.min(1, (g.xp - g.lvlStart) / (g.lvlNext - g.lvlStart)));
     const r = 44, C = 2 * Math.PI * r;
     return `<div class="emblem ${cls || ''}" style="width:${size}px;height:${size}px;--rc:${g.rank.color}">
-      <svg viewBox="0 0 100 100" class="em-ring"><defs><linearGradient id="emg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f0d394"/><stop offset="1" stop-color="#b8893f"/></linearGradient></defs>
+      <svg viewBox="0 0 100 100" class="em-ring"><defs><linearGradient id="emg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#c4b5fd"/><stop offset="1" stop-color="#6d5df6"/></linearGradient></defs>
         <circle cx="50" cy="50" r="${r}" class="em-track"/><circle cx="50" cy="50" r="${r}" class="em-prog" stroke="url(#emg)" stroke-dasharray="${(C * p).toFixed(1)} ${C.toFixed(1)}"/></svg>
       <div class="em-core">${Q.insignia(g.rank, Math.round(size * 0.62))}</div></div>`;
   };

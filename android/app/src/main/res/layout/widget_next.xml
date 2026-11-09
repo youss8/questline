@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/root" android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:gravity="center_vertical" android:padding="16dp" android:background="@drawable/w_bg">
-    <TextView android:id="@+id/kind" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#F5B841" android:textSize="11sp" android:letterSpacing="0.08" />
+    <TextView android:id="@+id/kind" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#A78BFA" android:textSize="11sp" android:letterSpacing="0.08" />
     <TextView android:id="@+id/title" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:textColor="#FFFFFF" android:textSize="17sp" android:textStyle="bold" android:maxLines="2" android:ellipsize="end" />
     <TextView android:id="@+id/time" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:textColor="#9CA3AF" android:textSize="13sp" />
 </LinearLayout>

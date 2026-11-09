@@ -15,14 +15,7 @@
       return { id: q.id, name: Q.qName(q, d), type: q.type === 'count' ? 'count' : 'check', count: typeof v === 'number' ? v : (v === true ? target : 0), target, done: !!it.done };
     });
     let cal = null;
-    try {
-      if (S.hero.onboarded) {
-        const mp = Q.mealPlan(d), log = Q.mealLog(d);
-        let k = 0, p = 0;
-        for (const m of mp.meals) if (!m.empty && log[m.slot] === 'done') { k += m.k; p += m.p; }
-        cal = { target: Math.round(mp.T.kcal), eaten: Math.round(k), protein: Math.round(p), proteinTarget: Math.round(mp.T.p) };
-      }
-    } catch (e) { /* nutrition not set up */ }
+    try { if (Q.calToday) { const c = Q.calToday(); cal = { target: c.target, eaten: c.eaten, protein: c.p, proteinTarget: c.pt }; } } catch (e) { /* nutrition not set up */ }
     let next = null;
     try {
       const plan = Q.planDay(d), now = nowMin();
@@ -33,7 +26,7 @@
         if (it.kind === 'block') { next = { title: it.label, time: Q.fmtTime(it.s), kind: 'Commitment' }; break; }
       }
     } catch (e) { /* no plan yet */ }
-    const qt = Q.quoteFor(d);
+    const mq = Q.moodQuote ? Q.moodQuote() : null, qt = mq ? { t: mq[1], c: mq[0] } : Q.quoteFor(d);
     return {
       date: d, level: g.level, rank: g.rank && g.rank.name || '', streak: g.cur,
       xpPct: Math.round(100 * (g.xp - g.lvlStart) / Math.max(1, g.lvlNext - g.lvlStart)),

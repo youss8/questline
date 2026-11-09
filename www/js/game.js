@@ -128,6 +128,7 @@
     let jN = 0; for (const k in S.journal) if ((S.journal[k] || '').trim().length >= 10) jN++;
     xp += jN * 10; add('wis', jN * 10);
 
+    if (Q.extXp) { const e = Q.extXp(); for (const k in e) { xp += e[k]; add(k, e[k]); } }
     if (penalty) { xp = Math.max(0, xp - penalty); statXp.dis = Math.max(0, statXp.dis - penalty); }
 
     let questUps = 0;

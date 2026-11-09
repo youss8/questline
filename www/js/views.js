@@ -26,7 +26,7 @@
       <button class="top-em" data-act="tab" data-tab="you" aria-label="Profile">${Q.emblem(g, 54)}</button>
     </header>
     <div class="statrow">
-      <div class="lvl"><div class="lvl-h"><span class="disp">Level ${g.level}</span><span class="muted">${g.rank.name}</span></div>${bar(pct(g.xp - g.lvlStart, g.lvlNext - g.lvlStart), 'linear-gradient(90deg,#b8893f,#f0d394)', 'xp')}<div class="tiny muted">${g.xp - g.lvlStart} / ${g.lvlNext - g.lvlStart} XP</div></div>
+      <div class="lvl"><div class="lvl-h"><span class="disp">Level ${g.level}</span><span class="muted">${g.rank.name}</span></div>${bar(pct(g.xp - g.lvlStart, g.lvlNext - g.lvlStart), 'linear-gradient(90deg,#6d5df6,#c4b5fd)', 'xp')}<div class="tiny muted">${g.xp - g.lvlStart} / ${g.lvlNext - g.lvlStart} XP</div></div>
       <div class="pill ${g.cur ? 'hot' : ''}" title="Streak">${ic('flame')}<b>${g.cur}</b></div>
       <div class="pill" title="Streak shields">${ic('shield-check')}<b>${g.shields}</b></div>
       <div class="pill" title="Coins">${ic('coins')}<b>${g.coins}</b></div>
@@ -65,7 +65,7 @@
         <h3>${esc(m.name)}</h3>
         <p class="muted small">${info.defeated ? 'Day won. Keep stacking quests for XP.' : esc(m.line)}</p>
         <div class="res"><span>Resistance</span><b>${left}<small>/${info.hp}</small></b></div>
-        ${bar(p, info.defeated ? 'var(--green)' : 'linear-gradient(90deg,#e5654f,#f08a5d)', 'hp')}
+        ${bar(p, info.defeated ? 'var(--green)' : 'linear-gradient(90deg,#fb7185,#f472b6)', 'hp')}
         <div class="tiny muted">${info.done}/${info.total} quests${info.minis ? ` · ${info.minis} mini` : ''}${info.flexN ? ` · ${info.flexN} optional` : ''}${info.low ? ' · low-energy: 15% weaker' : ''}</div>
       </div>
       ${info.defeated && !opened ? `<button class="drop-btn" data-act="chest" data-d="${d}">${ic('gift')}<span>Reward drop</span></button>` : ''}
@@ -128,7 +128,7 @@
     const st = Q.mealLog(d)[mp.slot];
     return `<div class="row meal ${st === 'done' ? 'done' : st === 'off' ? 'skip' : ''}" data-act="meal-open" data-slot="${mp.slot}" data-d="${d}">
       <div class="tm">${T(item.s)}</div>
-      <div class="ico" style="--sc:#d6bb63">${ic(mp.tpl.icon)}</div>
+      <div class="ico" style="--sc:#a78bfa">${ic(mp.tpl.icon)}</div>
       <div class="meta"><div class="name">${esc(mp.label)} · ${esc(mp.tpl.name)}</div><div class="sub"><span>${mp.k} kcal</span><span>${mp.p} g protein</span>${item.atWork ? '<span>at work</span>' : ''}</div></div>
       <div class="chk">${st === 'off' ? ic('x') : ic('check')}</div></div>`;
   }
@@ -141,7 +141,7 @@
   function bonusRow(d) {
     if (d !== Q.today()) return '';
     const b = Q.bonusFor(d), done = !!Q.S.bonus[d];
-    return `<div class="row quest bonus ${done ? 'done' : ''}" data-act="bonus"><div class="ico" style="--sc:#d4af6a">${ic('dice-5')}</div>
+    return `<div class="row quest bonus ${done ? 'done' : ''}" data-act="bonus"><div class="ico" style="--sc:#8b7cff">${ic('dice-5')}</div>
       <div class="meta"><div class="name">${esc(b.name)}</div><div class="sub"><span>Bonus · today only</span><span>+25 XP</span></div></div><div class="chk">${ic('check')}</div></div>`;
   }
 
@@ -175,6 +175,7 @@
         ${allday.length ? `<div class="sec"><span>All day</span></div>${allday.join('')}` : ''}
         ${flex.length ? `<div class="sec"><span>If you find time</span><span class="muted">optional today</span></div><p class="hint">No free slot fits these today, so they don't count against you. Doing them still earns XP.</p>${flex.join('')}` : ''}
         ${bonusRow(d)}
+        ${d === t && Q.todayExtra ? Q.todayExtra() : ''}
         <p class="hint c">Hold any quest for the mini version, skip, reminder or edit.</p>`;
     }
     return `${topbar(g)}
@@ -215,7 +216,7 @@
         <div class="card-h"><div><div class="kicker">Your week</div><b>Commitments & free time</b></div><button class="btn ghost xs" data-act="sched-edit">${ic('pencil')} Edit</button></div>
         <div class="wk-axis"><span>05:00</span><span>11:00</span><span>17:00</span><span>23:00</span><span>05:00</span></div>
         ${rows}
-        <div class="legend"><span><i style="background:#5aa9e6"></i>Work</span><span><i style="background:#9b8afb"></i>Study</span><span><i class="lg-tick"></i>Quest</span><span><i class="lg-tick meal"></i>Meal</span></div>
+        <div class="legend"><span><i style="background:#38bdf8"></i>Work</span><span><i style="background:#22d3ee"></i>Study</span><span><i class="lg-tick"></i>Quest</span><span><i class="lg-tick meal"></i>Meal</span></div>
       </section>
       <section class="card">
         <div class="card-h"><div><div class="kicker">Training</div><b>${train.perWeek || 3} sessions a week · ${train.pref === 'morning' ? 'mornings' : train.pref === 'any' ? 'any time' : 'evenings'}</b></div></div>
@@ -279,9 +280,9 @@
       const px = i => 12 + i * (W - 24) / (w.length - 1), py = y => H - 14 - (y - lo) / (hi - lo) * (H - 28);
       const pts = w.map((x, i) => `${px(i).toFixed(1)},${py(x.kg).toFixed(1)}`).join(' ');
       const delta = Math.round((ys[ys.length - 1] - ys[0]) * 10) / 10;
-      chart = `<svg viewBox="0 0 ${W} ${H}" class="wchart" role="img" aria-label="Weight trend"><defs><linearGradient id="wg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="rgba(212,175,106,.35)"/><stop offset="1" stop-color="rgba(212,175,106,0)"/></linearGradient></defs>
-        <polygon points="${px(0)},${H} ${pts} ${px(w.length - 1)},${H}" fill="url(#wg)"/><polyline points="${pts}" fill="none" stroke="#d4af6a" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
-        ${w.map((x, i) => `<circle cx="${px(i)}" cy="${py(x.kg)}" r="3" fill="#0b0c0f" stroke="#f0d394" stroke-width="1.5"/>`).join('')}</svg>
+      chart = `<svg viewBox="0 0 ${W} ${H}" class="wchart" role="img" aria-label="Weight trend"><defs><linearGradient id="wg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="rgba(139, 124, 255,.35)"/><stop offset="1" stop-color="rgba(139, 124, 255,0)"/></linearGradient></defs>
+        <polygon points="${px(0)},${H} ${pts} ${px(w.length - 1)},${H}" fill="url(#wg)"/><polyline points="${pts}" fill="none" stroke="#8b7cff" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+        ${w.map((x, i) => `<circle cx="${px(i)}" cy="${py(x.kg)}" r="3" fill="#06070b" stroke="#c4b5fd" stroke-width="1.5"/>`).join('')}</svg>
         <div class="wmeta"><span>${fmt(ys[0])} → <b>${fmt(ys[ys.length - 1])} kg</b></span><span class="${delta <= 0 ? 'good' : 'bad'}">${delta > 0 ? '+' : ''}${fmt(delta)} kg</span></div>`;
     } else if (w.length === 1) chart = `<p><b class="disp big">${fmt(w[0].kg)} kg</b> <span class="muted small">on ${Q.niceDate(w[0].d)}</span></p>`;
     return `<section class="card"><div class="card-h"><div><div class="kicker">Body weight</div><b>Trend</b></div><button class="btn ghost xs" data-act="weight">${ic('plus')} Log</button></div>${chart}</section>`;
@@ -299,7 +300,7 @@
       return `<section class="card meal-card ${st || ''} ${open ? 'open' : ''}">
         <button class="mc-h" data-act="meal-toggle" data-k="${d + m.slot}">
           <div class="mc-time">${tm ? T(tm.s) : ''}<small>${esc(m.label)}</small></div>
-          <div class="ico" style="--sc:#d6bb63">${ic(m.tpl.icon)}</div>
+          <div class="ico" style="--sc:#a78bfa">${ic(m.tpl.icon)}</div>
           <div class="meta"><div class="name">${esc(m.tpl.name)}</div><div class="sub"><span>${m.k} kcal</span><span>P ${m.p}</span><span>C ${m.c}</span><span>F ${m.f}</span>${tm && tm.atWork ? '<span>at work</span>' : ''}</div></div>
           <div class="chk">${st === 'done' ? ic('check') : st === 'off' ? ic('x') : ic('chevron-down')}</div>
         </button>
@@ -319,9 +320,9 @@
         <div class="tg-ring"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" class="rg-t"/><circle cx="50" cy="50" r="44" class="rg-p" stroke-dasharray="${(C * kp).toFixed(1)} ${C.toFixed(1)}"/></svg>
           <div class="tg-c"><b class="disp">${fmt(T0.kcal - eaten.k)}</b><small>kcal left</small></div></div>
         <div class="tg-r">
-          <div class="mac"><span>Protein</span><b>${eaten.p}<small>/${T0.p} g</small></b></div>${bar(pct(eaten.p, T0.p), '#e8765f', 'thin')}
-          <div class="mac"><span>Carbs</span><b>${eaten.c}<small>/${T0.c} g</small></b></div>${bar(pct(eaten.c, T0.c), '#5aa9e6', 'thin')}
-          <div class="mac"><span>Fat</span><b>${eaten.f}<small>/${T0.f} g</small></b></div>${bar(pct(eaten.f, T0.f), '#d6bb63', 'thin')}
+          <div class="mac"><span>Protein</span><b>${eaten.p}<small>/${T0.p} g</small></b></div>${bar(pct(eaten.p, T0.p), '#f472b6', 'thin')}
+          <div class="mac"><span>Carbs</span><b>${eaten.c}<small>/${T0.c} g</small></b></div>${bar(pct(eaten.c, T0.c), '#38bdf8', 'thin')}
+          <div class="mac"><span>Fat</span><b>${eaten.f}<small>/${T0.f} g</small></b></div>${bar(pct(eaten.f, T0.f), '#a78bfa', 'thin')}
         </div>
         <div class="tg-foot"><span>${ic('target')} ${fmt(T0.kcal)} kcal/day</span><span>${ic('trending-down')} ${S.nutri.goal === 'lose' ? `≈${fmt(T0.weekly)} kg/week` : S.nutri.goal === 'gain' ? 'Lean gain' : 'Maintain'}</span><span>${ic('glass-water')} ${T0.water} L water</span></div>
       </section>
@@ -373,7 +374,7 @@
     const have = new Set(S.hustles.map(h => h.name));
     return `<p class="muted pt-sub">Income projects run like quests. Every entry and step powers your Wealth stat.</p>
       <div class="stats3"><div><b>${money(month)}</b><span>This month</span></div><div><b>${money(all)}</b><span>All time</span></div><div><b>${S.hustles.length}</b><span>Hustles</span></div></div>
-      ${S.hustles.map(h => { const e = sum(h.entries), gl = h.goal || 0, td = h.tasks.filter(x => x.done).length; return `<div class="card hcard" data-act="hustle-open" data-id="${h.id}"><div class="hrow"><div class="ico" style="--sc:#d6bb63">${ic(h.icon)}</div><div class="meta"><div class="name">${esc(h.name)}</div><div class="sub">${h.tasks.length ? `<span>${td}/${h.tasks.length} steps</span>` : ''}<span>${money(e)}${gl ? ` of ${money(gl)}` : ''}</span></div></div><button class="plus gold" data-act="income-add" data-id="${h.id}">${ic('plus')}</button></div>${gl ? bar(pct(e, gl), '#d6bb63', 'thin') : ''}</div>`; }).join('') || '<p class="empty">No hustles yet. Start one and give it a goal.</p>'}
+      ${S.hustles.map(h => { const e = sum(h.entries), gl = h.goal || 0, td = h.tasks.filter(x => x.done).length; return `<div class="card hcard" data-act="hustle-open" data-id="${h.id}"><div class="hrow"><div class="ico" style="--sc:#a78bfa">${ic(h.icon)}</div><div class="meta"><div class="name">${esc(h.name)}</div><div class="sub">${h.tasks.length ? `<span>${td}/${h.tasks.length} steps</span>` : ''}<span>${money(e)}${gl ? ` of ${money(gl)}` : ''}</span></div></div><button class="plus gold" data-act="income-add" data-id="${h.id}">${ic('plus')}</button></div>${gl ? bar(pct(e, gl), '#a78bfa', 'thin') : ''}</div>`; }).join('') || '<p class="empty">No hustles yet. Start one and give it a goal.</p>'}
       <div class="actions"><button class="btn primary wide" data-act="hustle-new">${ic('plus')} Start a hustle</button></div>
       <div class="sec"><span>Ideas</span><span>tap to start</span></div>
       <div class="ideas">${Q.HUSTLE_IDEAS.map((h, i) => have.has(h.name) ? '' : `<button class="idea" data-act="hustle-idea" data-i="${i}">${ic(h.icon)}<span>${esc(h.name)}</span>${h.tasks.length ? `<small>${h.tasks.length} steps</small>` : ''}</button>`).join('')}</div>`;
@@ -395,7 +396,7 @@
     const poly = keys.map((k, i) => pt(i, R * g.score[k] / max).map(n => n.toFixed(1)).join(',')).join(' ');
     const dots = keys.map((k, i) => { const [x, y] = pt(i, R * g.score[k] / max); return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="4" fill="${statC(k)}"/>`; }).join('');
     const labels = keys.map((k, i) => { const [x, y] = pt(i, R + 26); return `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" class="rl" text-anchor="middle" dominant-baseline="middle"><tspan class="rl-n">${Q.STATS[k].short}</tspan> ${g.score[k]}</text>`; }).join('');
-    return `<svg class="radar" viewBox="0 0 300 300" role="img" aria-label="Attribute radar"><defs><radialGradient id="rgd"><stop offset="0" stop-color="rgba(240,211,148,.45)"/><stop offset="1" stop-color="rgba(212,175,106,.12)"/></radialGradient></defs>${[.25, .5, .75, 1].map(ring).join('')}${axes}<polygon class="rp" points="${poly}" fill="url(#rgd)"/>${dots}${labels}</svg>`;
+    return `<svg class="radar" viewBox="0 0 300 300" role="img" aria-label="Attribute radar"><defs><radialGradient id="rgd"><stop offset="0" stop-color="rgba(240,211,148,.45)"/><stop offset="1" stop-color="rgba(139, 124, 255,.12)"/></radialGradient></defs>${[.25, .5, .75, 1].map(ring).join('')}${axes}<polygon class="rp" points="${poly}" fill="url(#rgd)"/>${dots}${labels}</svg>`;
   }
   function viewYou() {
     const sub = Q.ui.sub;
@@ -420,7 +421,7 @@
         <h1>${esc(S.hero.name)}</h1>
         <div class="pf-rank" style="color:${g.rank.color}">${g.rank.name} · Rank ${g.rank.r}</div>
         <div class="pf-nums"><div><b class="disp">${g.level}</b><span>Level</span></div><div><b class="disp">${g.power}</b><span>Power</span></div><div><b class="disp">${fmt(g.xp)}</b><span>Total XP</span></div></div>
-        ${bar(pct(g.xp - g.lvlStart, g.lvlNext - g.lvlStart), 'linear-gradient(90deg,#b8893f,#f0d394)', 'xp wide')}
+        ${bar(pct(g.xp - g.lvlStart, g.lvlNext - g.lvlStart), 'linear-gradient(90deg,#6d5df6,#c4b5fd)', 'xp wide')}
         <p class="muted small">${g.lvlNext - g.xp} XP to level ${g.level + 1}${next ? ` · ${next.name} at level ${next.from}` : ''}</p>
       </section>
       <div class="stats3"><div><b>${g.cur}</b><span>Streak</span></div><div><b>${g.best}</b><span>Best streak</span></div><div><b>${g.defeated}</b><span>Days won</span></div></div>
@@ -474,7 +475,7 @@
   }
   function viewShop() {
     const S = Q.S, g = Q.game();
-    const rows = S.rewards.map(r => `<div class="row"><div class="ico" style="--sc:#d4af6a">${ic(r.icon)}</div><div class="meta"><div class="name">${esc(r.name)}</div><div class="sub"><span>${r.cost} coins</span></div></div>
+    const rows = S.rewards.map(r => `<div class="row"><div class="ico" style="--sc:#8b7cff">${ic(r.icon)}</div><div class="meta"><div class="name">${esc(r.name)}</div><div class="sub"><span>${r.cost} coins</span></div></div>
       <button class="btn primary xs" data-act="buy" data-id="${r.id}" ${g.coins < r.cost ? 'disabled' : ''}>Redeem</button><button class="iconbtn sm" data-act="reward-edit" data-id="${r.id}" aria-label="Edit">${ic('pencil')}</button></div>`).join('') || '<p class="empty">Add something you actually want.</p>';
     const hist = S.purchases.slice(-8).reverse().map(p => `<div class="hist"><span>${esc(p.name)}</span><small>${Q.niceDate(p.d, { day: 'numeric', month: 'short' })} · ${p.cost}</small></div>`).join('');
     return `${backBtn()}<h1 class="pt">Reward shop</h1><section class="card coinbox">${ic('coins')}<div><b class="disp">${g.coins}</b><span>coins · you earn 1 per 4 XP</span></div></section>${rows}
@@ -519,9 +520,10 @@
     </section>`;
   }
 
+  Q.viewFuel = () => viewFuel(); Q.viewPlan = () => viewPlan(); Q.viewQuests = () => viewQuests();
   Q.render = function () {
     const v = Q.$('#view'), t = Q.ui.tab;
-    v.innerHTML = t === 'today' ? viewToday() : t === 'plan' ? viewPlan() : t === 'fuel' ? viewFuel() : t === 'quests' ? viewQuests() : viewYou();
+    v.innerHTML = (Q.extView && Q.extView(t)) || (t === 'today' ? viewToday() : t === 'plan' ? viewPlan() : t === 'fuel' ? viewFuel() : t === 'quests' ? viewQuests() : viewYou());
     document.querySelectorAll('#nav button').forEach(b => b.classList.toggle('on', b.dataset.tab === t));
     if (Q.afterRender) Q.afterRender();
   };
