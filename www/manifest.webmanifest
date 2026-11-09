@@ -1,12 +1,12 @@
 {
-  "name": "Questline",
-  "short_name": "Questline",
-  "description": "Level up your life: daily monsters, side quests, side hustles. Works offline.",
+  "name": "Ember",
+  "short_name": "Ember",
+  "description": "Habits, food, money, plans and growth. Keep it lit.",
   "start_url": "./index.html",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#06070b",
-  "theme_color": "#06070b",
+  "background_color": "#13120f",
+  "theme_color": "#13120f",
   "icons": [
     {
       "src": "icon.png",

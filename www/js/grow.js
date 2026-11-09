@@ -1,162 +1,142 @@
-(function (Q) {
+(function (E) {
   'use strict';
-  const { esc, ic } = Q;
-  const X = () => Q.X();
-  const BOX = [0, 1, 3, 7, 16, 35]; // days until next review per Leitner box
+  const { esc, ic } = E;
+  const S = () => E.S, DE = () => E.S.de;
+  const BOX = [0, 1, 3, 7, 16, 35];
 
   // ================= GERMAN =================
-  const allCards = () => Q.DE_DECKS.flatMap(d => d.cards.map(c => ({ ...c, deck: d.id })));
-  const dueCards = () => {
-    const s = X().de.srs, t = Q.today();
-    const due = allCards().filter(c => s[c.id] && s[c.id].due <= t);
+  const cards = () => E.DE_DECKS.flatMap(d => d.cards);
+  const queue = () => {
+    const s = DE().srs, t = E.today(), all = cards();
+    const due = all.filter(c => s[c.id] && s[c.id].due <= t);
     const newToday = Object.values(s).filter(v => v.first === t).length;
-    const fresh = allCards().filter(c => !s[c.id]).slice(0, Math.max(0, 12 - newToday));
-    return { due, fresh };
+    return { due, fresh: all.filter(c => !s[c.id]).slice(0, Math.max(0, 10 - newToday)) };
   };
   function germanView() {
-    const de = X().de, s = de.srs, { due, fresh } = dueCards(), run = Q.ui.de;
-    if (run) return cardView(run);
-    const known = Object.values(s).filter(v => v.b >= 3).length, total = allCards().length, learning = Object.keys(s).length;
-    const L = de.lessons;
-    return `<section class="card" style="display:flex;gap:16px;align-items:center">${Q.ring(known / total, { size: 108, label: known, sub: `of ${total} words` })}
-        <div style="flex:1"><div class="kicker">Vocabulary</div><b style="font-size:17px">${due.length + fresh.length ? `${due.length} to review · ${fresh.length} new` : 'All caught up'}</b><p class="muted small">${learning} started · words move up a box each time you know them.</p>
-        <button class="btn primary" data-act="de-start" ${due.length + fresh.length ? '' : 'disabled'} style="margin-top:8px">${ic('zap')} Study now</button></div></section>
-      <section class="card"><div class="card-h"><div><div class="kicker">Course</div><b>${esc(L.course)} · ${L.left} lesson${L.left === 1 ? '' : 's'} left</b></div><button class="chip" data-act="de-course">${ic('pencil')}</button></div>
-        <div class="bar"><i style="width:${Q.pct(L.done, L.done + L.left)}%"></i></div>
-        <div class="actions"><button class="btn ghost" data-act="de-lesson" ${L.left ? '' : 'disabled'}>${ic('check')} Finished a lesson</button></div></section>
-      <div class="sec"><span>Decks</span></div>
-      <section class="card">${Q.DE_DECKS.map(d => { const n = d.cards.length, k = d.cards.filter(c => s[c.id] && s[c.id].b >= 3).length; return `<div class="li"><div class="dot" style="--dc:${d.lvl === 'A1.1' ? '#a78bfa' : '#22d3ee'}">${ic('book-a')}</div><div class="li-m"><b>${esc(d.n)}</b><small>${d.lvl} · ${k}/${n} known</small><div class="bar thin" style="margin-top:6px"><i style="width:${Q.pct(k, n)}%"></i></div></div><button class="chip" data-act="de-deck" data-id="${d.id}">Browse</button></div>`; }).join('')}</section>
-      <div class="sec"><span>Grammar cheat sheet</span></div>
-      <section class="card">${Q.DE_GRAMMAR.map(g => `<details class="gram"><summary>${esc(g.t)}</summary><p>${g.b}</p></details>`).join('')}</section>
-      <div class="sec"><span>Useful phrases for work</span></div>
-      <section class="card">${Q.DE_PHRASES.map(p => Q.li({ title: esc(p[0]), sub: esc(p[1]) })).join('')}</section>`;
+    const s = DE().srs, q = queue(), known = Object.values(s).filter(v => v.b >= 3).length, total = cards().length, c = DE().course;
+    const n = q.due.length + q.fresh.length;
+    return `<section class="card tint"><div class="row" style="gap:18px">${E.ring(known / total, { size: 100, stroke: 9, label: known, sub: `of ${total} words`, fs: 24 })}
+        <div class="grow"><div class="label">Today</div><div class="mid">${n ? `${n} cards` : 'All done'}</div><div class="small muted">${n ? `${q.due.length} to review, ${q.fresh.length} new · about ${Math.max(2, Math.round(n * 0.25))} min` : 'Come back tomorrow for new words.'}</div></div></div>
+        <button class="btn primary wide" style="margin-top:16px" data-a="de-start" ${n ? '' : 'disabled'}>${ic('play')} Practice now</button></section>
+      ${E.secH('Your course')}
+      <section class="card"><div class="row" style="justify-content:space-between"><div><div class="card-t">${esc(c.name)}</div><div class="small muted">${c.left ? `${c.left} lesson${c.left === 1 ? '' : 's'} left${c.next ? ` · then ${esc(c.next)}` : ''}` : `Finished${c.next ? `. Next: ${esc(c.next)}` : ''}`}</div></div><button class="pill" data-a="de-course">${ic('pencil')} Edit</button></div>
+        ${c.left ? `<button class="btn ghost wide" style="margin-top:14px" data-a="de-lesson">${ic('check')} I finished a lesson</button>` : `<button class="btn primary wide" style="margin-top:14px" data-a="de-next">Start ${esc(c.next || 'the next course')}</button>`}</section>
+      ${E.secH('Word decks')}
+      <div class="list">${E.DE_DECKS.map(d => { const k = d.cards.filter(x => s[x.id] && s[x.id].b >= 3).length; return `<button class="item" data-a="de-deck" data-id="${d.id}"><div class="grow"><div class="row" style="justify-content:space-between"><span class="t">${esc(d.n)}</span><span class="small muted">${k}/${d.cards.length}</span></div><div style="margin-top:7px">${E.bar(E.pct(k, d.cards.length), 'var(--plum)')}</div><div class="s">${d.lvl}</div></div></button>`; }).join('')}</div>
+      ${E.secH('Grammar in one minute')}
+      <div class="list">${E.DE_GRAMMAR.map(g => `<details class="acc"><summary>${esc(g.t)}</summary><div class="body">${g.b}</div></details>`).join('')}</div>
+      ${E.secH('Phrases for work')}
+      <div class="list">${E.DE_PHRASES.map(p => E.item({ t: esc(p[0]), s: esc(p[1]) })).join('')}</div>`;
   }
-  function cardView(run) {
-    const c = run.q[run.i];
-    if (!c) return '';
-    return `<section class="card c"><div class="kicker">${run.i + 1} / ${run.q.length}</div>
-      <div class="flash" style="margin:14px 0" data-act="de-flip"><div class="w">${esc(run.rev ? c.en : c.de)}</div>${run.show ? `<div class="t" style="font-size:20px;color:var(--cyan)">${esc(run.rev ? c.de : c.en)}</div>` : '<div class="t">Tap to reveal</div>'}</div>
-      ${run.show ? `<div class="actions"><button class="btn ghost" data-act="de-ans" data-v="0">Again</button><button class="btn ghost" data-act="de-ans" data-v="1">Good</button><button class="btn primary" data-act="de-ans" data-v="2">Easy</button></div>` : `<button class="btn primary wide" data-act="de-flip">Show answer</button>`}
-      <button class="chip" data-act="de-quit" style="margin-top:12px">End session</button></section>`;
-  }
-  Q.ACTS['de-start'] = () => { const { due, fresh } = dueCards(); const q = due.concat(fresh).slice(0, 25); q.sort(() => Math.random() - 0.5); Q.ui.de = { q, i: 0, show: false, n: 0 }; Q.render(); window.scrollTo(0, 0); };
-  Q.ACTS['de-flip'] = () => { if (Q.ui.de) { Q.ui.de.show = true; Q.render(); } };
-  Q.ACTS['de-ans'] = el => {
-    const run = Q.ui.de, c = run.q[run.i], de = X().de, t = Q.today(), v = +el.dataset.v;
-    const cur = de.srs[c.id] || { b: 0, first: t };
-    const b = v === 0 ? 0 : Math.min(BOX.length - 1, cur.b + v);
-    de.srs[c.id] = { ...cur, b, due: Q.addDays(t, v === 0 ? 0 : BOX[b]) };
-    de.seen = (de.seen || 0) + 1; run.n++;
-    if (v === 0) run.q.push(c); // see it again this session
-    run.i++; run.show = false; run.rev = Math.random() < 0.3 && b >= 2;
-    if (run.i >= run.q.length) { finishDe(); return; }
-    Q.save(); Q.render();
+  E.A['de-start'] = () => { const q = queue(), list = q.due.concat(q.fresh).slice(0, 25).sort(() => Math.random() - 0.5); E.ui.de = { q: list, i: 0, show: false, n: 0 }; deSheet(); };
+  const deSheet = () => {
+    const r = E.ui.de, c = r.q[r.i];
+    E.sheet({ title: 'German', full: true, body: `<div class="player"><div class="step">${r.i + 1} of ${r.q.length}</div>
+      <button class="flash" style="width:100%" data-a="de-flip"><div class="w">${esc(c.de)}</div>${r.show ? `<div class="a">${esc(c.en)}</div>` : '<div class="h">Say it out loud, then tap to check</div>'}</button>
+      ${E.bar(E.pct(r.i, r.q.length), 'var(--plum)')}</div>`,
+      foot: r.show ? `<button class="btn ghost" data-a="de-ans" data-v="0">Again</button><button class="btn ghost" data-a="de-ans" data-v="1">Good</button><button class="btn primary" data-a="de-ans" data-v="2">Easy</button>` : `<button class="btn primary" data-a="de-flip">Show answer</button>` });
+    E.onClose = () => { if (E.ui.de && E.ui.de.n) finishDe(true); E.ui.de = null; };
   };
-  const finishDe = () => {
-    const b = Q.game(), n = Q.ui.de.n; Q.ui.de = null;
-    const gq = Q.S.quests.find(q => q.key === 'german' && Q.activeOn(q, Q.today())); if (gq && n >= 15) Q.setLog(Q.today(), gq.id, true);
-    Q.save(); Q.toast(`Session done · ${n} reviews · +${n} XP`); Q.afterChange(b, { date: Q.today() });
+  E.A['de-flip'] = () => { E.ui.de.show = true; deSheet(); };
+  E.A['de-ans'] = el => {
+    const r = E.ui.de, c = r.q[r.i], t = E.today(), v = +el.dataset.v, cur = DE().srs[c.id] || { b: 0, first: t };
+    const b = v === 0 ? 0 : Math.min(5, cur.b + v);
+    DE().srs[c.id] = { ...cur, b, due: E.add(t, v === 0 ? 0 : BOX[b]) }; DE().seen++; r.n++;
+    if (v === 0) r.q.push(c);
+    r.i++; r.show = false; E.buzz(8);
+    if (r.i >= r.q.length) { finishDe(); return; }
+    E.save(); deSheet();
   };
-  Q.ACTS['de-quit'] = () => { if (Q.ui.de.n) finishDe(); else { Q.ui.de = null; Q.render(); } };
-  Q.ACTS['de-deck'] = el => { const d = Q.DE_DECKS.find(z => z.id === el.dataset.id), s = X().de.srs; Q.sheet(`<h3>${esc(d.n)}</h3>${d.cards.map(c => Q.li({ title: esc(c.de), sub: esc(c.en), right: s[c.id] ? `<span class="tag">box ${s[c.id].b}</span>` : '' })).join('')}`, { full: true }); };
-  Q.ACTS['de-lesson'] = el => { const L = X().de.lessons, b = Q.game(); L.done++; L.left = Math.max(0, L.left - 1); Q.save(); Q.celebrate(el, '+40 XP'); if (!L.left) Q.toast(`${L.course} complete! Tap the pencil to set your next course.`); Q.afterChange(b); };
-  Q.ACTS['de-course'] = () => { const L = X().de.lessons; Q.sheet(`<h3>German course</h3>${Q.field('Course / level', `<input id="dc-c" value="${esc(L.course)}">`)}${Q.field('Lessons left', `<input id="dc-l" type="number" value="${L.left}">`)}<div class="actions"><button class="btn primary wide" data-act="de-course-save">Save</button></div>`); };
-  Q.ACTS['de-course-save'] = () => { const L = X().de.lessons; L.course = Q.val('dc-c').trim() || L.course; L.left = Math.max(0, +Q.val('dc-l') || 0); Q.save(); Q.closeSheet(); Q.render(); };
+  const finishDe = (quiet) => {
+    const n = E.ui.de.n; E.ui.de = null; E.onClose = null;
+    if (n >= 10 && S().habits.some(h => h.id === 'german')) E.setLog(E.today(), 'german', n >= 15 ? true : 'mini');
+    E.save(); if (!quiet) { E.close(true); } E.toast(`${n} cards done. Gut gemacht!`); E.render();
+  };
+  E.A['de-deck'] = el => { const d = E.DE_DECKS.find(x => x.id === el.dataset.id), s = DE().srs; E.sheet({ title: esc(d.n), full: true, body: `<div class="list">${d.cards.map(c => E.item({ t: esc(c.de), s: esc(c.en), r: s[c.id] ? (s[c.id].b >= 3 ? '<span class="good">Known</span>' : '<small>Learning</small>') : '' })).join('')}</div>` }); };
+  E.A['de-lesson'] = () => { const c = DE().course; c.left = Math.max(0, c.left - 1); DE().lessons.push(E.today()); E.save(); E.buzz(15); E.toast(c.left ? `${c.left} to go` : `${c.name} done! 🎉`); E.render(); };
+  E.A['de-next'] = () => { const c = DE().course; c.name = c.next || 'Next course'; c.next = ''; c.left = 8; E.save(); E.A['de-course'](); };
+  E.A['de-course'] = () => { const c = DE().course; E.sheet({ title: 'German course', body: `${E.field('Current course', `<input id="dc-n" value="${esc(c.name)}">`)}${E.field('Lessons left', `<input id="dc-l" type="number" inputmode="numeric" value="${c.left}">`)}${E.field('Next course', `<input id="dc-x" value="${esc(c.next || '')}" placeholder="e.g. A1.2">`)}`, foot: '<button class="btn primary" data-a="dc-save">Save</button>' }); };
+  E.A['dc-save'] = () => { const c = DE().course; c.name = E.val('dc-n') || c.name; c.left = Math.max(0, E.num('dc-l')); c.next = E.val('dc-x'); E.save(); E.close(true); E.render(); };
 
   // ================= CAREER =================
   function careerView() {
-    const done = X().career.done;
-    const tot = Q.CAREER.reduce((a, p) => a + p.steps.length, 0), n = Object.keys(done).length;
-    const open = Q.ui.path;
-    return `<section class="card" style="display:flex;gap:16px;align-items:center">${Q.ring(n / tot, { size: 100, label: n, sub: `of ${tot} steps` })}<div><div class="kicker">Germany-ready</div><b style="font-size:17px">Career growth</b><p class="muted small">Each step is +25 XP. Small daily progress on CV, portfolio, skills and German work life.</p></div></section>
-      ${Q.CAREER.map(p => { const k = p.steps.filter((s, i) => done[p.id + i]).length, isOpen = open === p.id; return `<section class="card"><div class="li" data-act="path-open" data-id="${p.id}"><div class="dot">${ic(p.icon)}</div><div class="li-m"><b>${esc(p.n)}</b><small>${k}/${p.steps.length} done</small><div class="bar thin" style="margin-top:6px"><i style="width:${Q.pct(k, p.steps.length)}%"></i></div></div>${ic(isOpen ? 'chevron-up' : 'chevron-down', 'chev')}</div>
-        ${isOpen ? p.steps.map((s, i) => Q.li({ cb: !!done[p.id + i], cbAct: 'path-step', id: p.id + i, title: esc(s), sub: done[p.id + i] ? 'Done ' + Q.niceDate(done[p.id + i]) : '' })).join('') : ''}</section>`; }).join('')}`;
+    const done = S().career.done;
+    return `<p class="hint" style="margin-top:0">Your path to a strong developer job in Germany. One step at a time, during your career-learning slot.</p>
+      ${E.secH('My courses', 'Add', 'course-new')}
+      <div class="list">${S().courses.map(c => { const p = c.done / Math.max(1, c.total); return `<button class="item" data-a="course-open" data-id="${c.id}">${E.ring(p, { size: 46, stroke: 5, label: Math.round(p * 100) + '%', fs: 11 })}<div class="grow"><div class="t">${esc(c.n)}</div><div class="s">${c.done}/${c.total} ${esc(c.unit)}${c.by ? ' · ' + esc(c.by) : ''}${c.deadline ? ' · due ' + E.fmtDate(c.deadline) : ''}</div></div>${ic('chevron-right', 'dim')}</button>`; }).join('') || `<p class="empty">${ic('graduation-cap')}Add a course you're taking (Udemy, YouTube, a book…) to track it lesson by lesson.</p>`}</div>
+      ${E.secH('Roadmaps')}
+      ${E.ROADMAPS.map(r => { const k = r.steps.filter((_, i) => done[r.id + i]).length, open = E.ui.road === r.id, nx = r.steps.findIndex((_, i) => !done[r.id + i]);
+        return `<div class="list" style="margin-bottom:12px"><button class="item" data-a="road" data-id="${r.id}"><div class="ico" style="--c:${r.c}">${ic(r.icon)}</div><div class="grow"><div class="t">${esc(r.n)}</div><div class="s">${k}/${r.steps.length}${nx >= 0 && !open ? ' · next: ' + esc(r.steps[nx]) : ''}</div><div style="margin-top:7px">${E.bar(E.pct(k, r.steps.length), r.c)}</div></div>${ic(open ? 'chevron-up' : 'chevron-down', 'dim')}</button>
+          ${open ? r.steps.map((s, i) => `<div class="habit ${done[r.id + i] ? 'done' : ''}"><div class="grow"><div class="t" style="font-weight:500">${esc(s)}</div>${done[r.id + i] ? `<div class="s">Done ${E.fmtDate(done[r.id + i])}</div>` : ''}</div><button class="check ${done[r.id + i] ? 'on' : ''}" style="width:38px;height:38px" data-a="road-step" data-id="${r.id + i}">${done[r.id + i] ? ic('check') : ''}</button></div>`).join('') : ''}</div>`; }).join('')}`;
   }
-  Q.ACTS['path-open'] = el => { Q.ui.path = Q.ui.path === el.dataset.id ? null : el.dataset.id; Q.render(); };
-  Q.ACTS['path-step'] = el => { const d = X().career.done, id = el.dataset.id, b = Q.game(); if (d[id]) delete d[id]; else { d[id] = Q.today(); Q.celebrate(el, '+25 XP'); } Q.save(); Q.afterChange(b); };
-
-  // ================= QUOTES =================
-  const allQuotes = () => Q.QUOTES.map(q => [q.c, q.t]).concat(Q.QUOTES2);
-  Q.moodQuote = () => {
-    const t = Q.today(), ci = Q.S.checkins[t], cat = ci && Q.MOOD_CAT[ci.mood];
-    const pool = cat ? Q.QUOTES2.filter(q => q[0] === cat) : allQuotes();
-    return pool[Q.hash('mq' + t) % pool.length];
+  E.A.road = el => { E.ui.road = E.ui.road === el.dataset.id ? null : el.dataset.id; E.render(); };
+  E.A['road-step'] = el => { const d = S().career.done; if (d[el.dataset.id]) delete d[el.dataset.id]; else { d[el.dataset.id] = E.today(); E.buzz(15); E.toast('Step done. Keep climbing.'); } E.save(); E.render(); };
+  const courseForm = c => { c = c || {}; E.sheet({ title: c.id ? 'Edit course' : 'New course', body: `
+    ${E.field('Course', `<input id="cs-n" value="${esc(c.n || '')}" placeholder="e.g. Docker for developers">`)}
+    ${E.field('Where', `<input id="cs-b" value="${esc(c.by || '')}" placeholder="Udemy, YouTube, book…">`)}
+    <div class="grid2">${E.field('Total', `<input id="cs-t" type="number" inputmode="numeric" value="${c.total || 20}">`)}${E.field('Done', `<input id="cs-d" type="number" inputmode="numeric" value="${c.done || 0}">`)}</div>
+    ${E.field('Counted in', E.chips('cs-u', ['lessons', 'videos', 'chapters', 'hours'], c.unit || 'lessons'))}
+    ${E.field('Finish by (optional)', `<input id="cs-l" type="date" value="${c.deadline || ''}">`)}`,
+    foot: `${c.id ? `<button class="btn danger" data-a="course-del" data-id="${c.id}">Delete</button>` : ''}<button class="btn primary" data-a="course-save" data-id="${c.id || ''}">Save</button>`, focus: c.id ? null : 'cs-n' }); };
+  E.A['course-new'] = () => courseForm();
+  E.A['course-open'] = el => {
+    const c = S().courses.find(x => x.id === el.dataset.id), left = c.total - c.done, dl = c.deadline ? E.diff(c.deadline, E.today()) : null;
+    E.sheet({ title: esc(c.n), body: `<div class="row" style="gap:18px">${E.ring(c.done / c.total, { size: 96, stroke: 8, label: `${c.done}/${c.total}`, fs: 18 })}<div class="grow"><div class="small muted">${esc(c.by || '')}</div><div class="card-t">${left ? `${left} ${esc(c.unit)} left` : 'Completed 🎉'}</div>${dl != null && left ? `<div class="small ${dl < 7 ? 'bad' : 'muted'}">${dl > 0 ? `${Math.ceil(left / Math.max(1, dl / 7))} per week to finish by ${E.fmtDate(c.deadline)}` : 'Deadline passed'}</div>` : ''}</div></div>`,
+      foot: `<button class="btn ghost" data-a="course-edit" data-id="${c.id}">Edit</button>${left ? `<button class="btn primary" data-a="course-step" data-id="${c.id}">${ic('check')} One ${esc(c.unit.replace(/s$/, ''))} done</button>` : ''}` });
   };
-  function quotesView() {
-    const fav = X().qfav, cat = Q.ui.qcat || 'Today', mq = Q.moodQuote();
-    const cats = ['Today', 'Favorites', ...Q.QUOTE_CATS];
-    const list = cat === 'Favorites' ? allQuotes().filter(q => fav.includes(q[1])) : cat === 'Today' ? [] : allQuotes().filter(q => q[0] === cat);
-    const ci = Q.S.checkins[Q.today()];
-    return `<div class="tabs">${cats.map(c => `<button class="${c === cat ? 'on' : ''}" data-act="qcat" data-v="${c}">${c}</button>`).join('')}</div>
-      ${cat === 'Today' ? `<section class="flash"><div class="kicker">${ci ? `Picked for your ${['', 'rough', 'low', 'okay', 'good', 'great'][ci.mood]} mood` : 'Quote of the day'}</div><div class="w" style="font-size:24px;line-height:1.25;margin-top:10px">“${esc(mq[1])}”</div><div class="t">${esc(mq[0])}</div><button class="chip" data-act="qfav" data-v="${esc(mq[1])}" style="margin-top:12px">${ic('heart')} ${fav.includes(mq[1]) ? 'Saved' : 'Save'}</button></section>
-        ${ci ? '' : '<p class="hint c">Do the morning check-in on Today and the quote matches your mood.</p>'}` :
-        `<section class="card">${list.map(q => Q.li({ title: `“${esc(q[1])}”`, sub: esc(q[0]), right: `<button class="x-del" data-act="qfav" data-v="${esc(q[1])}">${ic(fav.includes(q[1]) ? 'heart' : 'plus')}</button>` })).join('') || '<p class="empty">Nothing saved yet.</p>'}</section>`}`;
-  }
-  Q.ACTS.qcat = el => { Q.ui.qcat = el.dataset.v; Q.render(); };
-  Q.ACTS.qfav = el => { const f = X().qfav, v = el.dataset.v, i = f.indexOf(v); if (i >= 0) f.splice(i, 1); else f.push(v); Q.save(); Q.render(); };
+  E.A['course-edit'] = el => courseForm(S().courses.find(x => x.id === el.dataset.id));
+  E.A['course-save'] = el => { const n = E.val('cs-n'), total = E.num('cs-t'); if (!n || !total) { E.toast('Add a name and total'); return; } let c = S().courses.find(x => x.id === el.dataset.id); if (!c) { c = { id: E.uid(), log: [] }; S().courses.push(c); } Object.assign(c, { n, by: E.val('cs-b'), total, done: E.clamp(E.num('cs-d'), 0, total), unit: E.val('cs-u') || 'lessons', deadline: E.val('cs-l') || null }); E.save(); E.close(true); E.render(); };
+  E.A['course-del'] = el => { S().courses = S().courses.filter(c => c.id !== el.dataset.id); E.save(); E.close(true); E.render(); };
+  E.A['course-step'] = el => { const c = S().courses.find(x => x.id === el.dataset.id); c.done = Math.min(c.total, c.done + 1); (c.log = c.log || []).push(E.today()); if (S().habits.some(h => h.id === 'career')) E.setLog(E.today(), 'career', true); E.save(); E.buzz(15); E.close(true); E.toast(c.done >= c.total ? `${c.n} completed! 🎓` : 'Nice. Logged.'); E.render(); };
 
-  // ================= REVIEW (stats) =================
-  function reviewView() {
-    const g = Q.game(), t = Q.today(), x = X();
-    const start = Q.addDays(t, -7 * 26 - Q.dow(t)), cells = [];
-    for (let d = start; d <= t; d = Q.addDays(d, 1)) { const i = g.days[d]; let l = 0; if (i && i.total) { const r = i.doneXp / Math.max(1, i.dueXp); l = i.perfect ? 4 : r >= 0.8 ? 3 : r >= 0.5 ? 2 : r > 0 ? 1 : 0; } cells.push(`<i data-l="${l}" title="${d}"></i>`); }
-    const wk = d => Q.diffDays(t, d) < 7;
-    const days7 = Array.from({ length: 7 }, (_, i) => g.days[Q.addDays(t, -i)]).filter(Boolean);
-    const hab = days7.reduce((a, i) => a + i.done, 0), habT = days7.reduce((a, i) => a + i.total, 0);
-    const spent = x.money.tx.filter(z => z.type === 'exp' && wk(z.date)).reduce((a, z) => a + (x.money.show === 'USD' ? (z.cur === 'USD' ? z.amt : z.amt / x.money.rate) : (z.cur === 'SYP' ? z.amt : z.amt * x.money.rate)), 0);
-    const W = Q.S.weights.slice().sort((a, b) => a.d.localeCompare(b.d)), wNow = W[W.length - 1], wOld = W.filter(w => Q.diffDays(t, w.d) >= 7).pop();
-    const moods = days7.map((_, i) => Q.S.checkins[Q.addDays(t, -i)]).filter(Boolean);
-    const avgMood = moods.length ? Math.round(moods.reduce((a, m) => a + m.mood, 0) / moods.length * 10) / 10 : null;
-    const kpi = (l, v) => `<div class="kpi"><small>${l}</small><b>${v}</b></div>`;
-    return `<section class="card"><div class="card-h"><div><div class="kicker">Last 6 months</div><b>Consistency map</b></div><span class="tag">best streak ${g.best}</span></div><div class="heat">${cells.join('')}</div>
-        <div class="tiny muted" style="margin-top:8px;display:flex;gap:10px;align-items:center">Less <span class="heat-k"><i></i><i data-l="1"></i><i data-l="2"></i><i data-l="3"></i><i data-l="4"></i></span> More</div></section>
-      <div class="sec"><span>This week</span></div>
-      <div class="kpis" style="margin-bottom:8px">${kpi('Habits', `${Q.pct(hab, habT)}%`)}${kpi('Workouts', x.train.logs.filter(l => wk(l.d)).length)}${kpi('Mobility', x.mob.logs.filter(l => wk(l.d)).length)}</div>
-      <div class="kpis" style="margin-bottom:8px">${kpi('Tasks done', x.tasks.filter(k => k.done && k.doneAt && wk(k.doneAt)).length)}${kpi('Spent', Q.fmMoney ? Q.fmMoney(spent) : Math.round(spent))}${kpi('Avg mood', avgMood != null ? avgMood + '/5' : '—')}</div>
-      <div class="kpis" style="margin-bottom:14px">${kpi('Weight', wNow ? wNow.kg + (wOld ? ` <small class="${wNow.kg <= wOld.kg ? 'good' : 'bad'}">${wNow.kg - wOld.kg > 0 ? '+' : ''}${Math.round((wNow.kg - wOld.kg) * 10) / 10}</small>` : '') : '—')}${kpi('Food days', Object.keys(x.diary).filter(wk).length + '/7')}${kpi('Level', g.level)}</div>
-      <div class="sgrid"><button class="tile" data-act="open-you" data-m="journal">${ic('notebook-pen')}<b>Journal</b><small>Wins, gratitude, reflections</small></button><button class="tile" data-act="open-you" data-m="settings">${ic('download')}<b>Backup</b><small>Export everything to a file</small></button></div>`;
+  // ================= READING =================
+  function readingView() {
+    const B = S().books, cur = B.filter(b => !b.done), fin = B.filter(b => b.done);
+    const today = E.log(E.today(), 'read');
+    return `<section class="card tint"><div class="row" style="justify-content:space-between"><div><div class="label">Today</div><div class="mid">${typeof today === 'number' ? today : 0} pages</div></div><button class="btn primary sm" data-a="read-log" ${cur.length ? '' : 'disabled'}>${ic('plus')} Log pages</button></div></section>
+      ${E.secH('Reading now', 'Add book', 'book-new')}
+      <div class="list">${cur.map(b => `<button class="item" data-a="book-open" data-id="${b.id}"><div class="ico" style="--c:var(--sand)">${ic('book-open')}</div><div class="grow"><div class="t">${esc(b.n)}</div><div class="s">${esc(b.by || '')}${b.by ? ' · ' : ''}page ${b.page} of ${b.pages}</div><div style="margin-top:7px">${E.bar(E.pct(b.page, b.pages), 'var(--sand)')}</div></div></button>`).join('') || `<p class="empty">${ic('book-open')}Add the book you're reading. Pages you log count toward your reading habit.</p>`}</div>
+      ${fin.length ? E.secH('Finished') + `<div class="list">${fin.map(b => E.item({ icon: 'badge-check', sm: true, c: 'var(--sage)', t: esc(b.n), s: b.doneAt ? E.fmtDate(b.doneAt, { month: 'long', year: 'numeric' }) : '' })).join('')}</div>` : ''}`;
   }
-  Q.ACTS['open-you'] = el => { Q.ui.tab = 'you'; Q.ui.sub = el.dataset.m; Q.render(); window.scrollTo(0, 0); };
+  const bookForm = b => { b = b || {}; E.sheet({ title: b.id ? 'Edit book' : 'New book', body: `${E.field('Title', `<input id="bk-n" value="${esc(b.n || '')}">`)}${E.field('Author', `<input id="bk-a" value="${esc(b.by || '')}">`)}<div class="grid2">${E.field('Pages', `<input id="bk-p" type="number" inputmode="numeric" value="${b.pages || 200}">`)}${E.field('Current page', `<input id="bk-c" type="number" inputmode="numeric" value="${b.page || 0}">`)}</div>`, foot: `${b.id ? `<button class="btn danger" data-a="book-del" data-id="${b.id}">Delete</button>` : ''}<button class="btn primary" data-a="book-save" data-id="${b.id || ''}">Save</button>`, focus: b.id ? null : 'bk-n' }); };
+  E.A['book-new'] = () => bookForm();
+  E.A['book-open'] = el => bookForm(S().books.find(b => b.id === el.dataset.id));
+  E.A['book-save'] = el => { const n = E.val('bk-n'); if (!n) { E.toast('Add the title'); return; } let b = S().books.find(x => x.id === el.dataset.id); if (!b) { b = { id: E.uid() }; S().books.push(b); } Object.assign(b, { n, by: E.val('bk-a'), pages: Math.max(1, E.num('bk-p')), page: E.num('bk-c') }); E.save(); E.close(true); E.render(); };
+  E.A['book-del'] = el => { S().books = S().books.filter(b => b.id !== el.dataset.id); E.save(); E.close(true); E.render(); };
+  E.A['read-log'] = () => { const cur = S().books.filter(b => !b.done); E.sheet({ title: 'Log reading', body: `${E.field('Book', E.chips('rl-b', cur.map(b => [b.id, b.n]), cur[0].id))}${E.field('Pages read now', '<input id="rl-p" type="number" inputmode="numeric" value="10" style="font-size:24px;text-align:center" data-enter="read-save">')}`, foot: '<button class="btn primary" data-a="read-save">Save</button>', focus: 'rl-p' }); };
+  E.A['read-save'] = () => { const b = S().books.find(x => x.id === E.val('rl-b')), n = E.num('rl-p'); if (!b || !n) return; b.page = Math.min(b.pages, b.page + n); if (b.page >= b.pages) { b.done = true; b.doneAt = E.today(); } const t = E.today(), v = E.log(t, 'read'); E.setLog(t, 'read', (typeof v === 'number' ? v : 0) + n); E.save(); E.close(true); E.toast(b.done ? `Finished ${b.n}! 📚` : `${n} pages. Page ${b.page}.`); E.render(); };
 
-  // ================= COURSES =================
-  const courses = () => (X().courses = X().courses || []);
-  function coursesView() {
-    const L = courses(), t = Q.today();
-    const open = L.filter(c => c.done < c.total), fin = L.filter(c => c.done >= c.total);
-    const row = c => { const p = c.done / Math.max(1, c.total), left = c.total - c.done, dl = c.deadline ? Q.daysUntil(c.deadline) : null, pace = dl > 0 ? Math.ceil(left / Math.max(1, dl / 7)) : null;
-      return `<section class="card"><div class="li"><div class="ring-s">${Q.ring(p, { size: 56, stroke: 12, label: Math.round(p * 100) + '%' })}</div><div class="li-m"><b>${esc(c.n)}</b><small>${esc(c.by || '')}${c.by ? ' · ' : ''}${c.done}/${c.total} ${esc(c.unit || 'lessons')}${c.deadline ? ` · due ${Q.whenLabel(c.deadline).toLowerCase()}` : ''}</small>${pace && left ? `<small class="tiny" style="display:block;color:var(--cyan)">${pace} per week to finish on time</small>` : ''}</div>
-        <button class="x-del" data-act="course-edit" data-id="${c.id}">${ic('pencil')}</button></div>
-        ${left ? `<div class="actions" style="margin-top:6px"><button class="btn primary wide" data-act="course-step" data-id="${c.id}">${ic('check')} Finished one ${esc((c.unit || 'lessons').replace(/s$/, ''))}</button></div>` : '<p class="good small c">Completed 🎉</p>'}</section>`; };
-    return `<section class="card" style="display:flex;gap:12px;align-items:center"><div class="dot">${ic('graduation-cap')}</div><div class="li-m" style="flex:1"><b>Your courses</b><small class="muted">Udemy, YouTube series, books, certificates… each finished lesson is +20 XP.</small></div></section>
-      ${open.map(row).join('') || '<p class="empty">No courses yet. Add the next thing you want to learn for your career.</p>'}
-      ${fin.length ? `<div class="sec"><span>Completed</span></div>${fin.map(row).join('')}` : ''}
-      <div class="fab-space"></div><button class="fab" data-act="course-new" aria-label="New course">${ic('plus')}</button>`;
+  // ================= JOURNAL =================
+  const MOODS = ['', '😞', '😕', '😐', '🙂', '😄'];
+  function journalView() {
+    const t = E.today(), J = S().journal, days = Object.keys(J).sort().reverse().slice(0, 20);
+    const last14 = Array.from({ length: 14 }, (_, i) => E.add(t, i - 13));
+    return `<button class="card sage" style="display:block;width:100%;text-align:left" data-a="journal-open" data-d="${t}"><div class="row"><div class="ico" style="--c:var(--sage)">${ic('feather')}</div><div class="grow"><div class="card-t">${J[t] ? 'Today\'s page' : 'Write today\'s page'}</div><div class="small muted">${J[t] ? esc(J[t].win || '') : 'One win, one lesson, one thing for tomorrow'}</div></div>${ic('chevron-right', 'dim')}</div></button>
+      ${E.secH('Mood, last 2 weeks')}<section class="card"><div class="days" style="grid-template-columns:repeat(14,1fr);gap:3px">${last14.map(d => `<div class="center"><div style="font-size:17px;line-height:1.6">${MOODS[S().mood[d]] || '<span class="dim">·</span>'}</div><div class="tiny dim">${E.parse(d).getDate()}</div></div>`).join('')}</div></section>
+      ${E.secH('Past pages')}<div class="list">${days.map(d => E.item({ a: 'journal-open', attrs: `data-d="${d}"`, t: E.rel(d), s: esc(J[d].win || J[d].lesson || ''), r: MOODS[S().mood[d]] || '' })).join('') || `<p class="empty">${ic('feather')}Your pages will collect here.</p>`}</div>
+      ${S().qfav.length ? E.secH('Saved quotes') + `<div class="list">${S().qfav.map(q => E.item({ t: `“${esc(q)}”` })).join('')}</div>` : ''}`;
   }
-  const courseSheet = c => Q.sheet(`<h3>${c ? 'Edit course' : 'New course'}</h3>
-    ${Q.field('Course', `<input id="cs-n" value="${esc(c ? c.n : '')}" placeholder="e.g. Laravel Testing with Pest">`)}
-    ${Q.field('Where', `<input id="cs-b" value="${esc(c ? c.by || '' : '')}" placeholder="Udemy, Laracasts, book…">`)}
-    <div class="sgrid">${Q.field('Total', `<input id="cs-t" type="number" value="${c ? c.total : 20}">`)}${Q.field('Done so far', `<input id="cs-d" type="number" value="${c ? c.done : 0}">`)}</div>
-    <div class="sgrid">${Q.field('Counted in', `<select id="cs-u">${Q.opts(['lessons', 'chapters', 'videos', 'hours', 'pages'], c ? c.unit : 'lessons')}</select>`)}${Q.field('Deadline (optional)', `<input id="cs-l" type="date" value="${c ? c.deadline || '' : ''}">`)}</div>
-    <div class="actions">${c ? `<button class="btn ghost" data-act="course-del" data-id="${c.id}">Delete</button>` : ''}<button class="btn primary" data-act="course-save" data-id="${c ? c.id : ''}">Save</button></div>`);
-  Q.ACTS['course-new'] = () => courseSheet(null);
-  Q.ACTS['course-edit'] = el => courseSheet(courses().find(c => c.id === el.dataset.id));
-  Q.ACTS['course-save'] = el => { const n = Q.val('cs-n').trim(), total = +Q.val('cs-t'); if (!n || !(total > 0)) { Q.toast('Name and total are needed'); return; } let c = courses().find(z => z.id === el.dataset.id); if (!c) { c = { id: Q.uid(), log: [] }; courses().push(c); } Object.assign(c, { n, by: Q.val('cs-b').trim(), total, done: Q.clamp(+Q.val('cs-d') || 0, 0, total), unit: Q.val('cs-u'), deadline: Q.val('cs-l') || null }); Q.save(); Q.closeSheet(); Q.render(); };
-  Q.ACTS['course-del'] = el => { X().courses = courses().filter(c => c.id !== el.dataset.id); Q.save(); Q.closeSheet(); Q.render(); };
-  Q.ACTS['course-step'] = el => { const c = courses().find(z => z.id === el.dataset.id), b = Q.game(); if (!c || c.done >= c.total) return; c.done++; (c.log = c.log || []).push(Q.today());
-    const cq = Q.S.quests.find(q => q.key === 'career' && Q.activeOn(q, Q.today())); if (cq) Q.setLog(Q.today(), cq.id, true);
-    Q.save(); Q.celebrate(el, '+20 XP'); if (c.done >= c.total) Q.toast(`${c.n} completed! 🎓`); Q.afterChange(b, { date: Q.today() }); };
-  // course XP and deadline reminders
-  const xp0 = Q.extXp; Q.extXp = () => { const o = xp0(); o.wis += courses().reduce((a, c) => a + (c.log || []).length * 20, 0); return o; };
-  const nb0 = Q.buildNotifications; Q.buildNotifications = () => { const out = nb0(); if (!Q.S.settings.remindersOn) return out; const now = Q._now();
-    for (const c of courses()) { if (!c.deadline || c.done >= c.total || Q.daysUntil(c.deadline) > 14) continue; const at = Q.parse(c.deadline); at.setHours(9, 0, 0, 0); const a = new Date(at - 864e5);
-      if (a > now) out.push({ id: 210000 + (Q.hash(c.id + 'a') % 1700000), title: `Course deadline tomorrow: ${c.n}`, body: `${c.total - c.done} ${c.unit} left`, at: a });
-      if (at > now) out.push({ id: 210000 + (Q.hash(c.id + 'b') % 1700000), title: `Course deadline today: ${c.n}`, body: `${c.total - c.done} ${c.unit} left`, at }); }
-    return out; };
-
-  // ================= GROW TAB =================
-  Q.VIEWS.grow = () => {
-    const sub = Q.tabOf('grow', 'german');
-    const bar = Q.tabsBar('grow', [['german', 'German', 'languages'], ['courses', 'Courses', 'graduation-cap'], ['career', 'Career', 'rocket'], ['quotes', 'Quotes', 'feather'], ['review', 'Review', 'chart-no-axes-column']], sub);
-    return Q.head('Grow') + bar + (sub === 'german' ? germanView() : sub === 'courses' ? coursesView() : sub === 'career' ? careerView() : sub === 'quotes' ? quotesView() : reviewView());
+  E.A['journal-open'] = el => {
+    const d = el.dataset.d, j = S().journal[d] || {};
+    E.sheet({ title: E.rel(d), full: true, body: `
+      ${E.field('A win today (any size)', `<textarea id="j-w" rows="2" placeholder="I did my mobility even though I was tired…">${esc(j.win || '')}</textarea>`)}
+      ${E.field('What I learned or would do differently', `<textarea id="j-l" rows="2">${esc(j.lesson || '')}</textarea>`)}
+      ${E.field('Grateful for', `<textarea id="j-g" rows="2">${esc(j.grat || '')}</textarea>`)}
+      ${E.field('The one thing for tomorrow', `<input id="j-t" value="${esc(j.tomorrow || '')}" placeholder="If I only do one thing tomorrow…">`)}
+      <label class="row" style="margin:4px"><input type="checkbox" id="j-q" style="width:22px;height:22px;accent-color:var(--ember)" ${S().qfav.includes(E.quoteOf(d)) ? 'checked' : ''}><span class="small">Save today's quote: “${esc(E.quoteOf(d))}”</span></label>`,
+      foot: `<button class="btn primary" data-a="journal-save" data-d="${d}">Save</button>` });
   };
-})(window.Q);
+  E.A['journal-save'] = el => {
+    const d = el.dataset.d, j = { win: E.val('j-w'), lesson: E.val('j-l'), grat: E.val('j-g'), tomorrow: E.val('j-t') };
+    if (Object.values(j).some(Boolean)) S().journal[d] = j; else delete S().journal[d];
+    const q = E.quoteOf(d), fav = S().qfav, i = fav.indexOf(q); if (E.$('#j-q').checked && i < 0) fav.push(q); if (!E.$('#j-q').checked && i >= 0) fav.splice(i, 1);
+    if (j.tomorrow && d === E.today()) S().tasks.push({ id: E.uid(), t: j.tomorrow, area: 'personal', due: E.add(d, 1), pri: true, done: false, created: d });
+    E.save(); E.close(true); E.toast(j.tomorrow && d === E.today() ? 'Saved. Tomorrow\'s one thing is in your plan.' : 'Saved'); E.render();
+  };
+
+  E.screens.grow = () => {
+    const sub = E.subOf('grow', 'german');
+    return E.hdr('Grow', 'German, career, reading and reflection') + E.seg('grow', [['german', 'German'], ['career', 'Career'], ['reading', 'Reading'], ['journal', 'Journal']], sub) + '<div class="spacer"></div>' +
+      (sub === 'career' ? careerView() : sub === 'reading' ? readingView() : sub === 'journal' ? journalView() : germanView());
+  };
+})(window.E);

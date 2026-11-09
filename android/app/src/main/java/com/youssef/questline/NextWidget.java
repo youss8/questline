@@ -11,7 +11,7 @@ public class NextWidget extends WidgetBase {
         RemoteViews v = new RemoteViews(c.getPackageName(), R.layout.widget_next);
         v.setOnClickPendingIntent(R.id.root, openApp(c));
         JSONObject n = s.optJSONObject("next");
-        if (!fresh) { v.setTextViewText(R.id.kind, "Next up"); v.setTextViewText(R.id.title, "Open Questline to load today"); v.setTextViewText(R.id.time, ""); return v; }
+        if (!fresh) { v.setTextViewText(R.id.kind, "Next up"); v.setTextViewText(R.id.title, "Open Ember to load today"); v.setTextViewText(R.id.time, ""); return v; }
         if (n == null) { v.setTextViewText(R.id.kind, "Next up"); v.setTextViewText(R.id.title, "Nothing left today 🎉"); v.setTextViewText(R.id.time, s.optInt("done") + "/" + s.optInt("total") + " habits done"); return v; }
         v.setTextViewText(R.id.kind, "Next up · " + n.optString("kind"));
         v.setTextViewText(R.id.title, n.optString("title"));

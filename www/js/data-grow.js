@@ -1,8 +1,8 @@
-(function (Q) {
+(function (E) {
   'use strict';
   // ---------- German: A1 vocabulary decks (German | English) ----------
   const deck = (id, n, lvl, raw) => ({ id, n, lvl, cards: raw.trim().split('\n').map(l => { const [de, en] = l.split('|').map(s => s.trim()); return { id: id + ':' + de, de, en }; }) });
-  Q.DE_DECKS = [
+  E.DE_DECKS = [
     deck('greet', 'Greetings & basics', 'A1.1', `
 Hallo|Hello
 Guten Morgen|Good morning
@@ -267,7 +267,7 @@ verstehen|to understand
 vergessen|to forget
 treffen|to meet`)
   ];
-  Q.DE_GRAMMAR = [
+  E.DE_GRAMMAR = [
     { t: 'Verb position', b: 'In a normal sentence the conjugated verb is always in position 2: "Heute <b>lerne</b> ich Deutsch." In yes/no questions it comes first: "<b>Lernst</b> du Deutsch?"' },
     { t: 'Present tense endings', b: 'ich lern<b>e</b>, du lern<b>st</b>, er/sie/es lern<b>t</b>, wir lern<b>en</b>, ihr lern<b>t</b>, sie/Sie lern<b>en</b>.' },
     { t: 'sein & haben', b: 'sein: bin, bist, ist, sind, seid, sind. haben: habe, hast, hat, haben, habt, haben.' },
@@ -282,7 +282,7 @@ treffen|to meet`)
     { t: 'Possessives', b: 'mein, dein, sein (his), ihr (her), unser, euer, ihr/Ihr. Add -e for feminine/plural: meine Mutter, meine Eltern.' },
     { t: 'Dative basics', b: 'After mit, bei, nach, von, zu, aus: dem (der/das), der (die), den…n (plural). "Ich fahre <b>mit dem</b> Bus."' }
   ];
-  Q.DE_PHRASES = [
+  E.DE_PHRASES = [
     ['Ich lerne seit … Monaten Deutsch.', 'I have been learning German for … months.'],
     ['Könnten Sie bitte langsamer sprechen?', 'Could you please speak more slowly?'],
     ['Ich habe einen Termin um 10 Uhr.', 'I have an appointment at 10.'],
@@ -294,7 +294,7 @@ treffen|to meet`)
   ];
 
   // ---------- Career growth paths (for German work life) ----------
-  Q.CAREER = [
+  E.CAREER = [
     {
       id: 'cv', n: 'CV & applications', icon: 'clipboard-list', steps: [
         'German-style CV (Lebenslauf): photo optional, reverse chronological, 2 pages max',
@@ -389,8 +389,8 @@ treffen|to meet`)
   ];
 
   // ---------- extra quotes by category ----------
-  Q.QUOTE_CATS = ['Discipline', 'Focus', 'Health', 'Career', 'Learning', 'Faith', 'Mindset', 'Money'];
-  Q.QUOTES2 = [
+  E.QUOTE_CATS = ['Discipline', 'Focus', 'Health', 'Career', 'Learning', 'Faith', 'Mindset', 'Money'];
+  E.QUOTES2 = [
     ['Discipline', 'Discipline is choosing between what you want now and what you want most.'],
     ['Discipline', 'Motivation gets you started. Systems keep you going.'],
     ['Discipline', 'Do it tired. Do it bored. Do it anyway.'],
@@ -423,5 +423,5 @@ treffen|to meet`)
     ['Money', 'Wealth is what you do not spend.']
   ];
   // mood → category for the quote of the day
-  Q.MOOD_CAT = { 1: 'Faith', 2: 'Mindset', 3: 'Focus', 4: 'Discipline', 5: 'Career' };
-})(window.Q);
+  E.MOOD_CAT = { 1: 'Faith', 2: 'Mindset', 3: 'Focus', 4: 'Discipline', 5: 'Career' };
+})(window.E);

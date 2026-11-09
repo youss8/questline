@@ -13,7 +13,7 @@ public class FuelWidget extends WidgetBase {
         JSONObject cal = s.optJSONObject("cal");
         if (!fresh || cal == null) {
             v.setTextViewText(R.id.big, "—");
-            v.setTextViewText(R.id.sub, fresh ? "Set up Fuel in the app" : "Open Questline to load today");
+            v.setTextViewText(R.id.sub, fresh ? "Log food in Ember" : "Open Ember to load today");
             v.setProgressBar(R.id.bar, 100, 0, false);
             v.setTextViewText(R.id.prot, "");
             return v;

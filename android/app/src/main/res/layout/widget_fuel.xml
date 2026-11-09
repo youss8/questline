@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/root" android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:gravity="center_vertical" android:padding="16dp" android:background="@drawable/w_bg">
-    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="FUEL" android:textColor="#9CA3AF" android:textSize="11sp" android:letterSpacing="0.12" />
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="FUEL" android:textColor="#A59D8F" android:textSize="11sp" android:letterSpacing="0.12" />
     <TextView android:id="@+id/big" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#FFFFFF" android:textSize="32sp" android:textStyle="bold" />
-    <TextView android:id="@+id/sub" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#9CA3AF" android:textSize="12sp" />
+    <TextView android:id="@+id/sub" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#A59D8F" android:textSize="12sp" />
     <ProgressBar android:id="@+id/bar" style="?android:attr/progressBarStyleHorizontal" android:layout_width="match_parent" android:layout_height="8dp" android:layout_marginTop="10dp" android:progressDrawable="@drawable/w_bar" android:max="100" />
-    <TextView android:id="@+id/prot" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:textColor="#F3F4F6" android:textSize="12sp" />
+    <TextView android:id="@+id/prot" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:textColor="#F1EBE0" android:textSize="12sp" />
 </LinearLayout>

@@ -11,10 +11,11 @@ public class QuoteWidget extends WidgetBase {
         RemoteViews v = new RemoteViews(c.getPackageName(), R.layout.widget_quote);
         v.setOnClickPendingIntent(R.id.root, openApp(c));
         String q = s.optString("quote");
-        v.setTextViewText(R.id.quote, q.isEmpty() ? "Every completed quest is a vote for who you are." : "“" + q + "”");
+        v.setTextViewText(R.id.quote, q.isEmpty() ? "Small steps every day add up to a different life." : "“" + q + "”");
         v.setTextViewText(R.id.cat, s.optString("quoteCat").toUpperCase());
-        v.setTextViewText(R.id.lvl, "Lv " + s.optInt("level", 1) + "  ·  🔥 " + s.optInt("streak") + " day streak");
-        v.setProgressBar(R.id.bar, 100, s.optInt("xpPct"), false);
+        int st = s.optInt("streak"), tot = Math.max(1, s.optInt("total")), dn = s.optInt("done");
+        v.setTextViewText(R.id.lvl, (st > 0 ? "🔥 " + st + "-day fire" : "Keep it lit") + "  ·  " + dn + "/" + s.optInt("total") + " today");
+        v.setProgressBar(R.id.bar, tot, Math.min(dn, tot), false);
         return v;
     }
 }

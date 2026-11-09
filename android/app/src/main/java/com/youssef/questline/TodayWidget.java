@@ -20,9 +20,9 @@ public class TodayWidget extends WidgetBase {
     RemoteViews build(Context c, JSONObject s, boolean fresh) {
         RemoteViews v = new RemoteViews(c.getPackageName(), R.layout.widget_today);
         v.setOnClickPendingIntent(R.id.header, openApp(c));
-        if (!fresh) {
-            v.setTextViewText(R.id.title, "Today");
-            v.setTextViewText(R.id.sub, "Open Questline to load today");
+        if (!fresh || !s.optBoolean("started", true)) {
+            v.setTextViewText(R.id.title, "Ember");
+            v.setTextViewText(R.id.sub, fresh ? "Day 1 is " + s.optString("start") : "Open Ember to load today");
             for (int i = 0; i < ROWS; i++) v.setViewVisibility(ROW[i], View.GONE);
             v.setOnClickPendingIntent(R.id.root, openApp(c));
             return v;
@@ -31,7 +31,7 @@ public class TodayWidget extends WidgetBase {
         int n = hs == null ? 0 : hs.length(), done = 0;
         for (int i = 0; i < n; i++) if (hs.optJSONObject(i).optBoolean("done")) done++;
         v.setTextViewText(R.id.title, "Today  " + done + "/" + n);
-        v.setTextViewText(R.id.sub, "Lv " + s.optInt("level", 1) + "  ·  🔥 " + s.optInt("streak"));
+        int st = s.optInt("streak"); v.setTextViewText(R.id.sub, st > 0 ? "🔥 " + st + "-day fire" : "Light it today");
         for (int i = 0; i < ROWS; i++) {
             if (i >= n) { v.setViewVisibility(ROW[i], View.GONE); continue; }
             JSONObject h = hs.optJSONObject(i);
@@ -42,7 +42,7 @@ public class TodayWidget extends WidgetBase {
             v.setTextViewText(NAME[i], label);
             v.setTextViewText(BOX[i], d ? "✓" : "");
             v.setInt(BOX[i], "setBackgroundResource", d ? R.drawable.w_box_on : R.drawable.w_box);
-            v.setTextColor(NAME[i], d ? 0xFF6B7280 : 0xFFF3F4F6);
+            v.setTextColor(NAME[i], d ? 0xFF6F685D : 0xFFF1EBE0);
             Intent t = new Intent(c, TodayWidget.class).setAction(TOGGLE).putExtra("id", h.optString("id"));
             v.setOnClickPendingIntent(ROW[i], PendingIntent.getBroadcast(c, 100 + i, t, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE));
         }
@@ -65,7 +65,7 @@ public class TodayWidget extends WidgetBase {
                     JSONObject tick = new JSONObject().put("id", id).put("date", s.optString("date"));
                     if ("count".equals(h.optString("type"))) {
                         int cnt = h.optInt("count"), tgt = Math.max(1, h.optInt("target", 1));
-                        int next = cnt >= tgt ? 0 : cnt + 1;   // full counter wraps back to zero
+                        int step = Math.max(1, h.optInt("step", 1)); int next = cnt >= tgt ? 0 : Math.min(tgt, cnt + step);   // full counter wraps back to zero
                         h.put("count", next).put("done", next >= tgt);
                         tick.put("delta", next - cnt);
                     } else {

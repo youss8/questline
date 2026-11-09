@@ -1,7 +1,7 @@
-(function (Q) {
+(function (E) {
   'use strict';
   // ---------- extra foods (per 100 g; unit = household portion in grams) ----------
-  Object.assign(Q.FOODS, {
+  Object.assign(E.FOODS, {
     shawarma: { n: 'Chicken shawarma sandwich', k: 230, p: 13, c: 22, f: 10, unit: [250, 'sandwich', 'sandwiches'], cat: 'Syrian dishes' },
     falafel: { n: 'Falafel', k: 333, p: 13, c: 32, f: 18, unit: [17, 'piece', 'pieces'], cat: 'Syrian dishes' },
     falafelsand: { n: 'Falafel sandwich', k: 250, p: 8, c: 33, f: 10, unit: [200, 'sandwich', 'sandwiches'], cat: 'Syrian dishes' },
@@ -72,7 +72,7 @@
 
   // ---------- exercises ----------
   // m = muscle group, eq = home|gym|both, t = 'reps'|'time'
-  Q.EX = {
+  E.EX = {
     pushup: { n: 'Push-ups', m: 'Chest', eq: 'home', inc: 1 },
     inclinepu: { n: 'Incline push-ups (hands on table)', m: 'Chest', eq: 'home', inc: 1 },
     pike: { n: 'Pike push-ups', m: 'Shoulders', eq: 'home', inc: 1 },
@@ -107,7 +107,7 @@
     cablecrunch: { n: 'Cable crunch', m: 'Core', eq: 'gym', w: true, inc: 2.5 }
   };
   // [exercise, sets, repMin, repMax]
-  Q.PROGRAMS = {
+  E.PROGRAMS = {
     home: {
       name: 'Home strength (no equipment)', note: 'Full body, 3–4 days a week. Hit the top of the rep range on every set, then the app moves you to a harder version or more reps.',
       days: [
@@ -129,7 +129,7 @@
 
   // ---------- mobility (desk job: lower back, upper back, hips, knees) ----------
   // [name, seconds, cue]
-  Q.MOBILITY = {
+  E.MOBILITY = {
     reset: {
       n: 'Desk reset', mins: 8, d: 'Every workday. Undo the sitting.', lv: [
         ['Chin tucks', 40, 'Slide your head straight back, double chin, hold 2 s each.'],
@@ -193,4 +193,4 @@
       ]
     }
   };
-})(window.Q);
+})(window.E);

@@ -1,55 +1,41 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
-<meta name="theme-color" content="#06070b">
-<meta name="mobile-web-app-capable" content="yes">
-<title>Questline</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+<meta name="theme-color" content="#13120f">
+<title>Ember</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.png" type="image/png">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="css/app.css">
+<script>try{var s=JSON.parse(localStorage.getItem('ember.v1')||'{}').settings||{};var t=s.theme||'system';document.documentElement.dataset.theme=(t==='dark'||(t==='system'&&!matchMedia('(prefers-color-scheme: light)').matches))?'dark':'light';}catch(e){}</script>
 </head>
 <body>
-<div id="app"><main id="view"></main></div>
-<nav id="nav" aria-label="Main">
-  <div class="in">
-    <button data-tab="today" data-icon="sparkles">Today</button>
-    <button data-tab="body" data-icon="dumbbell">Body</button>
-    <button data-tab="life" data-icon="calendar-check">Life</button>
-    <button data-tab="grow" data-icon="sprout">Grow</button>
-    <button data-tab="you" data-icon="user-round">You</button>
-  </div>
-</nav>
-<div id="banner" role="status" aria-live="polite"></div>
+<main id="app"></main>
+<nav id="nav" aria-label="Main"><div class="in">
+  <button data-tab="today" aria-label="Today"></button>
+  <button data-tab="plan" aria-label="Plan"></button>
+  <button data-tab="health" aria-label="Health"></button>
+  <button class="add" data-a="quick" aria-label="Add"></button>
+  <button data-tab="money" aria-label="Money"></button>
+  <button data-tab="grow" aria-label="Grow"></button>
+</div></nav>
 <div id="toast" role="status" aria-live="polite"></div>
-<input type="file" id="importFile" accept="application/json,.json" hidden>
-<script src="js/util.js"></script>
+<input type="file" id="file" accept="application/json,.json" hidden>
 <script src="js/icons.js"></script>
-<script src="js/content.js"></script>
+<script src="js/core.js"></script>
 <script src="js/foods.js"></script>
 <script src="js/data-body.js"></script>
 <script src="js/data-grow.js"></script>
-<script src="js/state.js"></script>
-<script src="js/sfx.js"></script>
-<script src="js/schedule.js"></script>
-<script src="js/nutrition.js"></script>
-<script src="js/program.js"></script>
-<script src="js/game.js"></script>
-<script src="js/native.js"></script>
-<script src="js/widgets.js"></script>
-<script src="js/fx.js"></script>
-<script src="js/views.js"></script>
-<script src="js/sheets.js"></script>
-<script src="js/ext.js"></script>
-<script src="js/body.js"></script>
-<script src="js/life.js"></script>
-<script src="js/grow.js"></script>
-<script src="js/calendar.js"></script>
+<script src="js/seed.js"></script>
+<script src="js/logic.js"></script>
+<script src="js/today.js"></script>
+<script src="js/plan.js"></script>
 <script src="js/health.js"></script>
-<script src="js/scan.js"></script>
-<script src="js/onboarding.js"></script>
-<script>document.querySelectorAll('#nav button').forEach(function (b) { b.insertAdjacentHTML('afterbegin', Q.ic(b.dataset.icon)); });</script>
+<script src="js/money.js"></script>
+<script src="js/grow.js"></script>
+<script src="js/settings.js"></script>
+<script src="js/native.js"></script>
 <script src="js/main.js"></script>
 </body>
 </html>
