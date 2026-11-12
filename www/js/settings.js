@@ -78,7 +78,7 @@
         ${E.item({ a: 'restore', icon: 'upload', t: 'Restore from a backup' })}
       </div>
       <button class="btn danger wide" style="margin-top:22px" data-a="reset">Erase everything</button>
-      <p class="hint center" style="margin-top:14px">Ember · works fully offline · your data stays on this phone</p>` });
+      <p class="hint center" style="margin-top:14px">Ember · build 14 · works fully offline · your data stays on this phone</p>` });
   };
   E.A.theme = b => { S().settings.theme = b.dataset.v; E.save(); E.applyTheme(); };
   E.applyTheme = () => { const t = S().settings.theme, dark = t === 'dark' || (t === 'system' && !matchMedia('(prefers-color-scheme: light)').matches); document.documentElement.dataset.theme = dark ? 'dark' : 'light'; const m = E.$('meta[name=theme-color]'); if (m) m.content = dark ? '#0c0f13' : '#f1f2f5'; try { const SB = window.Capacitor && window.Capacitor.Plugins.SystemBars; if (SB) SB.setStyle({ style: dark ? 'DARK' : 'LIGHT' }); } catch (e) { /* optional */ } };

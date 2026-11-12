@@ -34,9 +34,9 @@
   --st: var(--safe-area-inset-top, env(safe-area-inset-top, 0px)); --sb: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)); }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-html { background: var(--bg); -webkit-text-size-adjust: 100%; }
-html, body { margin: 0; color: var(--text); font: 15.5px/1.5 'Inter', system-ui, sans-serif; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
-body { min-height: 100dvh; background: var(--bg); overscroll-behavior-y: none; -webkit-user-select: none; user-select: none; }
+html { background: var(--bg); -webkit-text-size-adjust: 100%; overflow-x: hidden; overscroll-behavior-y: none; }
+html, body { margin: 0; color: var(--text); font: 15.5px/1.5 'Inter', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+body { min-height: 100dvh; background: var(--bg); -webkit-user-select: none; user-select: none; }
 button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; text-align: inherit; }
 button:disabled { opacity: .4; }
 h1, h2, h3, p { margin: 0; }
