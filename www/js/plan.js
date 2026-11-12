@@ -22,7 +22,7 @@
   E.A['pick-date'] = () => E.sheet({ title: 'Go to a date', body: `<input type="date" id="pd" value="${E.ui.day || E.today()}">`, foot: `<button class="btn primary" data-a="pd-go">Go</button>` });
   E.A['pd-go'] = () => { const v = E.val('pd'); if (v) E.ui.day = v; E.close(true); E.render(); };
   E.A['add-for-day'] = el => E.sheet({ title: 'Add to ' + E.rel(el.dataset.d), body: `<div class="list">${E.item({ a: 'new-task', attrs: `data-d="${el.dataset.d}"`, icon: 'list-checks', t: 'Task', s: 'Something to do' })}${E.item({ a: 'new-event', attrs: `data-d="${el.dataset.d}"`, icon: 'calendar-check', c: 'var(--rose)', t: 'Date or event', s: 'Birthday, appointment, meeting…' })}</div>` });
-  E.A['ag-open'] = el => { const k = el.dataset.kind, id = el.dataset.id; if (k === 'event') E.A['edit-event']({ dataset: { id } }); else if (k === 'sub') E.go('money'); else if (k === 'block') E.A['edit-block']({ dataset: { id } }); };
+  E.A['ag-open-old'] = el => { const k = el.dataset.kind, id = el.dataset.id; if (k === 'event') E.A['edit-event']({ dataset: { id } }); else if (k === 'sub') E.go('money'); else if (k === 'block') E.A['edit-block']({ dataset: { id } }); };
 
   // ---------- tasks ----------
   const taskRow = k => {
@@ -49,6 +49,7 @@
       ${E.field('Area', E.chips('tk-a', S().areas.map(a => [a.id, a.name]), ar))}
       ${E.field('When', E.chips('tk-wq', [['', 'No date'], [E.today(), 'Today'], [E.add(E.today(), 1), 'Tomorrow'], ['pick', 'Pick a date']], k.due ? (k.due === E.today() ? E.today() : k.due === E.add(E.today(), 1) ? E.add(E.today(), 1) : 'pick') : (d || ''), { change: 'tk-when' }))}
       <div id="tk-dbox" style="${k.due && k.due !== E.today() && k.due !== E.add(E.today(), 1) ? '' : 'display:none'}">${E.field('Date', `<input type="date" id="tk-d" value="${k.due || d || E.today()}">`)}</div>
+      ${E.field('How long will it take?', E.chips('tk-e', [[15, '15 min'], [30, '30 min'], [60, '1 hour'], [120, '2 hours']], k.est || 30), 'Ember finds a free slot of this size in your day.')}
       <div class="grid2">${E.field('Time (optional)', `<input type="time" id="tk-h" value="${k.time || ''}">`)}${E.field('Repeats', `<select id="tk-r">${E.opts([['none', 'No'], ['daily', 'Daily'], ['weekly', 'Weekly'], ['monthly', 'Monthly']], k.repeat || 'none')}</select>`)}</div>
       <label class="row" style="margin:4px 4px 14px"><input type="checkbox" id="tk-p" ${k.pri ? 'checked' : ''} style="width:22px;height:22px;accent-color:var(--ember)"><span>Important</span></label>
       ${E.field('Notes', `<textarea id="tk-n" rows="2" placeholder="Optional">${esc(k.notes || '')}</textarea>`)}
@@ -63,12 +64,15 @@
     const t = E.val('tk-t'); if (!t) { E.toast('Write the task first'); return; }
     let k = S().tasks.find(x => x.id === el.dataset.id); if (!k) { k = { id: E.uid(), done: false, created: E.today() }; S().tasks.push(k); }
     const wq = E.val('tk-wq');
-    Object.assign(k, { t, area: E.val('tk-a') || 'personal', due: wq === 'pick' ? E.val('tk-d') : (wq || null), time: E.val('tk-h') || null, repeat: E.val('tk-r'), pri: E.$('#tk-p').checked, notes: E.val('tk-n') });
+    Object.assign(k, { t, area: E.val('tk-a') || 'personal', due: wq === 'pick' ? E.val('tk-d') : (wq || null), time: E.val('tk-h') || null, est: +E.val('tk-e') || 30, repeat: E.val('tk-r'), pri: E.$('#tk-p').checked, notes: E.val('tk-n') });
     E.save(); E.close(true); E.toast(el.dataset.id ? 'Saved' : 'Task added'); E.render();
   };
   E.A['del-task'] = el => { const i = S().tasks.findIndex(k => k.id === el.dataset.id), k = S().tasks[i]; S().tasks.splice(i, 1); E.save(); E.close(true); E.render(); E.toast('Task deleted', () => S().tasks.splice(i, 0, k)); };
   E.A['task-done'] = el => {
     const k = S().tasks.find(x => x.id === el.dataset.id); if (!k) return;
+    if (el.dataset.close) E.close(true);
+    const A = S().at || (S().at = {}), td = E.today();
+    if (!k.done) (A[td] = A[td] || {})['t:' + k.id] = E.nowMin();
     if (!k.done && k.repeat && k.repeat !== 'none' && k.due) { S().tasks.push({ ...k, id: E.uid(), done: true, doneAt: E.today(), repeat: 'none' }); k.due = E.nextOcc(k.due, k.repeat, E.add(k.due, 1)); E.toast(`Done. Next: ${E.rel(k.due)}`); }
     else { k.done = !k.done; k.doneAt = k.done ? E.today() : null; if (k.done) E.toast('Done ✓', () => { k.done = false; k.doneAt = null; }); }
     E.buzz(12); E.save(); E.render();
@@ -131,8 +135,8 @@
   }
 
   E.screens.plan = () => {
-    const sub = E.subOf('plan', 'agenda');
-    return E.hdr('Plan', 'Your days, tasks and everything important') + E.seg('plan', [['agenda', 'Days'], ['tasks', 'Tasks'], ['important', 'Important'], ['week', 'Week']], sub) + '<div class="spacer"></div>' +
-      (sub === 'tasks' ? tasksView() : sub === 'important' ? importantView() : sub === 'week' ? weekView() : agendaView()) + (E.calCard && sub === 'agenda' ? E.calCard() : '');
+    const sub = E.subOf('plan', 'tasks') === 'agenda' ? 'tasks' : E.subOf('plan', 'tasks');
+    return `<button class="hdr-back" data-a="go-hub">${ic('chevron-left')} All</button>` + E.hdr('Plan', 'Tasks, dates and your fixed week') + E.seg('plan', [['tasks', 'Tasks'], ['important', 'Dates & notes'], ['week', 'Week']], sub) + '<div class="spacer"></div>' +
+      (sub === 'important' ? importantView() + (E.calCard ? E.calCard() : '') : sub === 'week' ? weekView() : tasksView());
   };
 })(window.E);

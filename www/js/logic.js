@@ -82,7 +82,7 @@
     return E.FOODS[id];
   };
   E.recipeTotals = r => r.items.reduce((a, it) => { const f = E.FOODS[it.id] || { k: 0, p: 0, c: 0, f: 0 }, m = it.g / 100; return { g: a.g + it.g, k: a.k + f.k * m, p: a.p + f.p * m, c: a.c + f.c * m, f: a.f + f.f * m }; }, { g: 0, k: 0, p: 0, c: 0, f: 0 });
-  E.entryM = e => { const f = E.foodById(e.id); if (!f) return { k: 0, p: 0, c: 0, f: 0 }; const m = e.g / 100; return { k: f.k * m, p: f.p * m, c: f.c * m, f: f.f * m }; };
+  E.entryM = e => { if (e.q) return { k: e.k || 0, p: e.p || 0, c: 0, f: 0 }; const f = E.foodById(e.id); if (!f) return { k: 0, p: 0, c: 0, f: 0 }; const m = e.g / 100; return { k: f.k * m, p: f.p * m, c: f.c * m, f: f.f * m }; };
   E.dayFood = d => {
     const es = S().food.diary[d] || [], t = { k: 0, p: 0, c: 0, f: 0 };
     for (const e of es) { const m = E.entryM(e); t.k += m.k; t.p += m.p; t.c += m.c; t.f += m.f; }

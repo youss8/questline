@@ -16,7 +16,7 @@
         <div class="grow"><div class="small muted">Eaten</div><div class="big">${E.n(f.k)}</div><div class="small muted">of ${E.n(T.kcal)} kcal · about ${T.weekly} kg/week</div></div></div>
         <div class="macro">${[['Protein', f.p, T.p, 'var(--ember)'], ['Carbs', f.c, T.c, 'var(--sand)'], ['Fat', f.f, T.f, 'var(--slate)']].map(([n, v, t, c]) => `<div><small>${n}</small><b>${v}</b><span class="muted small"> / ${t} g</span>${E.bar(E.pct(v, t), c)}</div>`).join('')}</div></section>
       ${MEALS.map(([m, l, icn]) => { const es = diary.map((e, i) => ({ e, i })).filter(x => x.e.meal === m), k = es.reduce((a, x) => a + E.entryM(x.e).k, 0);
-        return `${E.secH(`${l} <span class="small muted" style="font-family:Inter;font-weight:600">${es.length ? E.n(k) + ' kcal' : ''}</span>`, 'Add', 'food-add', `data-m="${m}"`)}<div class="list">${es.map(({ e, i }) => { const fd = E.foodById(e.id), mm = E.entryM(e); return E.item({ a: 'food-entry', attrs: `data-i="${i}"`, t: esc(fd ? fd.n : 'Food'), s: `${amt(e, fd)} · ${r0(mm.p)} g protein`, r: `${r0(mm.k)}<small>kcal</small>` }); }).join('') || `<button class="item" data-a="food-add" data-m="${m}"><div class="ico sm" style="--c:var(--muted)">${ic(icn)}</div><div class="grow muted">Add ${l.toLowerCase()}</div>${ic('plus', 'dim')}</button>`}</div>`; }).join('')}
+        return `${E.secH(`${l} <span class="small muted" style="font-family:Inter;font-weight:600">${es.length ? E.n(k) + ' kcal' : ''}</span>`, 'Add', 'food-add', `data-m="${m}"`)}<div class="list">${es.map(({ e, i }) => { const fd = E.foodById(e.id), mm = E.entryM(e); return E.item({ a: 'food-entry', attrs: `data-i="${i}"`, t: esc(fd ? fd.n : e.n || 'Food'), s: `${e.q ? 'Quick add' : amt(e, fd)} · ${r0(mm.p)} g protein`, r: `${r0(mm.k)}<small>kcal</small>` }); }).join('') || `<button class="item" data-a="food-add" data-m="${m}"><div class="ico sm" style="--c:var(--muted)">${ic(icn)}</div><div class="grow muted">Add ${l.toLowerCase()}</div>${ic('plus', 'dim')}</button>`}</div>`; }).join('')}
       <div class="grid2" style="margin-top:18px"><button class="btn ghost" data-a="seg" data-k="food" data-v="prep">${ic('chef-hat')} Meal prep</button><button class="btn ghost" data-a="save-meal">${ic('bookmark')} Save as meal</button></div>`;
   }
   const amt = (e, f) => f && f.unit && e.u ? `${E.n(e.g / f.unit[0], 1)} ${e.g / f.unit[0] === 1 ? f.unit[1] : f.unit[2]}` : `${r0(e.g)} g`;
@@ -29,6 +29,7 @@
     E.sheet({ title: `Add to ${MEALS.find(x => x[0] === m)[1].toLowerCase()}`, full: true, body: `
       <div class="row" style="gap:8px"><input id="fs" placeholder="Search: chicken, shawarma, rice…" autocomplete="off" style="flex:1">${E.canScan() ? `<button class="round" style="width:50px;height:50px" data-a="scan" aria-label="Scan barcode">${ic('scan-barcode')}</button>` : ''}</div>
       ${F().saved.length ? `<div class="label" style="margin:16px 4px 8px">Saved meals</div><div class="chips">${F().saved.map(s => `<button class="chip" data-a="saved-log" data-id="${s.id}">${ic('bookmark')}${esc(s.n)}</button>`).join('')}</div>` : ''}
+      <div class="chips" style="margin-top:12px"><button class="chip" data-a="food-quick">${ic('zap')}Quick calories</button>${yest(m).length ? `<button class="chip" data-a="food-copy">${ic('copy')}Same as yesterday</button>` : ''}</div>
       <div id="fs-r" style="margin-top:14px"></div>`, foot: `<button class="btn ghost" data-a="myfood-new">${ic('plus')} Food not listed? Add it</button>`, focus: 'fs' });
     const inp = E.$('#fs'), box = E.$('#fs-r');
     const paint = () => {
@@ -38,6 +39,11 @@
     };
     inp.addEventListener('input', paint); paint();
   };
+  const yest = m => (F().diary[E.add(E.ui.foodDay || E.today(), -1)] || []).filter(e => e.meal === m);
+  E.A['food-copy'] = () => { const d = E.ui.foodDay || E.today(), m = E.ui.meal, list = yest(m); (F().diary[d] = F().diary[d] || []); list.forEach((e, j) => F().diary[d].push({ ...e, t: Date.now() + j })); E.save(); E.close(true); E.toast(`Copied ${list.length} item${list.length === 1 ? '' : 's'} from yesterday`); E.render(); };
+  E.A['food-quick'] = () => E.sheet({ title: 'Quick calories', body: `<p class="hint" style="margin-top:0">For when you know the number, or just want a rough estimate.</p>${E.field('What was it?', '<input id="fq-n" placeholder="e.g. Dinner at friends">')}<div class="grid2">${E.field('Calories', '<input id="fq-k" type="number" inputmode="numeric" style="font-size:22px;text-align:center" data-enter="food-quick-ok">')}${E.field('Protein g (optional)', '<input id="fq-p" type="number" inputmode="numeric" style="font-size:22px;text-align:center">')}</div><div class="chips">${[[300, 'Light meal'], [600, 'Normal meal'], [900, 'Big meal'], [1200, 'Feast']].map(([k, l]) => `<button class="chip" data-a="fq-set" data-k="${k}">${l} · ${k}</button>`).join('')}</div>`, foot: '<button class="btn primary" data-a="food-quick-ok">Add</button>', focus: 'fq-k' });
+  E.A['fq-set'] = el => { E.$('#fq-k').value = el.dataset.k; };
+  E.A['food-quick-ok'] = () => { const k = E.num('fq-k'); if (!(k > 0)) { E.toast('Enter the calories'); return; } const d = E.ui.foodDay || E.today(); (F().diary[d] = F().diary[d] || []).push({ id: 'quick', q: 1, n: E.val('fq-n') || 'Quick add', k, p: E.num('fq-p'), g: 0, meal: E.ui.meal || mealNow(), t: Date.now() }); E.save(); E.close(true); E.toast(`Added ${E.n(k)} kcal`); E.render(); };
   const mealNow = () => { const h = E.now().getHours(); return h < 11 ? 'breakfast' : h < 17 ? 'lunch' : 'dinner'; };
   E.A['food-pick'] = el => {
     const id = el.dataset.id, f = E.foodById(id); if (!f) return;
@@ -64,10 +70,10 @@
   };
   E.A['food-entry'] = el => {
     const d = E.ui.foodDay || E.today(), i = +el.dataset.i, e = F().diary[d][i], f = E.foodById(e.id);
-    E.sheet({ title: esc(f ? f.n : 'Food'), body: E.field('Grams', `<input id="fe-g" type="number" inputmode="decimal" value="${r0(e.g)}" style="font-size:22px;text-align:center">`) + E.field('Meal', E.chips('fe-m', MEALS.map(m => [m[0], m[1]]), e.meal)),
+    E.sheet({ title: esc(f ? f.n : e.n || 'Food'), body: E.field(e.q ? 'Calories' : 'Grams', `<input id="fe-g" type="number" inputmode="decimal" value="${r0(e.q ? e.k : e.g)}" style="font-size:22px;text-align:center">`) + E.field('Meal', E.chips('fe-m', MEALS.map(m => [m[0], m[1]]), e.meal)),
       foot: `<button class="btn danger" data-a="food-del" data-i="${i}">Remove</button><button class="btn primary" data-a="food-upd" data-i="${i}">Save</button>` });
   };
-  E.A['food-upd'] = el => { const d = E.ui.foodDay || E.today(), e = F().diary[d][+el.dataset.i]; e.g = E.num('fe-g') || e.g; e.u = false; e.meal = E.val('fe-m') || e.meal; E.save(); E.close(true); E.render(); };
+  E.A['food-upd'] = el => { const d = E.ui.foodDay || E.today(), e = F().diary[d][+el.dataset.i]; if (e.q) e.k = E.num('fe-g') || e.k; else { e.g = E.num('fe-g') || e.g; e.u = false; } e.meal = E.val('fe-m') || e.meal; E.save(); E.close(true); E.render(); };
   E.A['food-del'] = el => { const d = E.ui.foodDay || E.today(), i = +el.dataset.i, e = F().diary[d].splice(i, 1)[0]; if (!F().diary[d].length) delete F().diary[d]; E.save(); E.close(true); E.render(); E.toast('Removed', () => (F().diary[d] = F().diary[d] || []).splice(i, 0, e)); };
   E.A['save-meal'] = () => { const d = E.ui.foodDay || E.today(); if (!(F().diary[d] || []).length) { E.toast('Log some food first'); return; } E.sheet({ title: 'Save as a meal', body: E.field('Name', '<input id="sm-n" placeholder="e.g. My usual breakfast" data-enter="saved-save">') + '<p class="hint">Next time, add all of it with one tap.</p>', foot: '<button class="btn primary" data-a="saved-save">Save</button>', focus: 'sm-n' }); };
   E.A['saved-save'] = () => { const d = E.ui.foodDay || E.today(); F().saved.push({ id: E.uid(), n: E.val('sm-n') || 'My meal', items: F().diary[d].map(e => ({ id: e.id, g: e.g, u: e.u })) }); E.save(); E.close(true); E.toast('Meal saved'); E.render(); };
@@ -161,7 +167,7 @@
     w.rest = Date.now() + (E.EX[w.ex[w.i].id].t === 'time' ? 45 : 60) * 1000; woSheet();
   };
   E.A['wo-set'] = () => logSet(E.ui.wo.ex[E.ui.wo.i].t);
-  E.A['wo-less'] = () => { const x = E.ui.wo.ex[E.ui.wo.i]; E.sheet({ title: 'How many did you do?', body: `<input id="wl" type="number" inputmode="numeric" value="${Math.max(1, x.t - 2)}" style="font-size:28px;text-align:center" data-enter="wo-less-ok">`, foot: '<button class="btn primary" data-a="wo-less-ok">Save set</button>', focus: 'wl' }); E.onClose = null; };
+  E.A['wo-less'] = () => { const x = E.ui.wo.ex[E.ui.wo.i]; E.sheet({ title: 'How many did you do?', body: `<input id="wl" type="number" inputmode="numeric" value="${Math.max(1, x.t - 2)}" style="font-size:28px;text-align:center" data-enter="wo-less-ok">`, foot: '<button class="btn primary" data-a="wo-less-ok">Save set</button>', focus: 'wl' }); E.onClose = () => setTimeout(woSheet, 0); };
   E.A['wo-less-ok'] = () => logSet(Math.max(0, E.num('wl')));
   E.A['wo-skiprest'] = () => { E.ui.wo.rest = 0; woSheet(); };
   const finishWo = () => {

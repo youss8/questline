@@ -5,9 +5,9 @@
 
   // ---------- quick add: the + in the middle of the bar ----------
   E.A.quick = () => {
-    const tiles = [['tx-new', 'Expense', 'wallet', 'var(--ember)', 'data-type="exp"'], ['food-add', 'Food', 'utensils', 'var(--sand)', ''], ['new-task', 'Task', 'list-checks', 'var(--slate)', ''],
+    const tiles = [['tx-new', 'Expense', 'wallet', 'var(--ember)', 'data-type="exp"'], ['food-add', 'Food', 'utensils', 'var(--sand)', ''], ['new-task', 'Task', 'list-checks', 'var(--sage)', ''], ['focus-new', 'Focus session', 'timer', 'var(--plum)', ''],
       ['new-event', 'Important date', 'calendar-check', 'var(--rose)', ''], ['weigh', 'Weight', 'scale', 'var(--sage)', ''], ['water-add', 'Glass of water', 'glass-water', 'var(--slate)', ''],
-      ['tx-new', 'Income', 'coins', 'var(--good)', 'data-type="inc"'], ['new-note', 'Note', 'notebook-pen', 'var(--plum)', '']];
+      ['new-note', 'Note', 'notebook-pen', 'var(--plum)', '']];
     E.sheet({ title: 'Add', body: `<div class="grid2">${tiles.map(([a, t, i, c, x]) => `<button class="card tap" style="margin:0;text-align:left;padding:16px" data-a="${a}" ${x}><div class="ico" style="--c:${c};margin-bottom:12px">${ic(i)}</div><div class="card-t">${t}</div></button>`).join('')}</div>` });
   };
   E.A['water-add'] = () => { E.close(true); const t = E.today(), v = E.log(t, 'water'); E.setLog(t, 'water', (typeof v === 'number' ? v : 0) + 1); E.save(); E.buzz(10); E.toast(`Water: ${(typeof v === 'number' ? v : 0) + 1} glasses`); E.render(); };
@@ -71,6 +71,7 @@
       <div class="list">
         ${E.item({ a: 'habits-edit', icon: 'list-checks', t: 'Habits', chev: true })}
         ${E.item({ a: 'go-week', icon: 'calendar-clock', t: 'Weekly schedule & meal times', chev: true })}
+        ${E.item({ a: 'setup', icon: 'wand-sparkles', c: 'var(--slate)', t: 'Setup checklist', chev: true })}
         ${E.item({ a: 'money-settings', icon: 'wallet', t: 'Money: rate, salary, budgets', chev: true })}
         ${E.item({ a: 'welcome', icon: 'flame', t: 'How Ember works', chev: true })}
         ${E.item({ a: 'backup', icon: 'download', t: 'Back up everything', s: 'Save a file you can restore later' })}
@@ -79,9 +80,8 @@
       <button class="btn danger wide" style="margin-top:22px" data-a="reset">Erase everything</button>
       <p class="hint center" style="margin-top:14px">Ember · works fully offline · your data stays on this phone</p>` });
   };
-  E.A['go-week'] = () => { E.close(true); E.go('plan', 'week'); };
   E.A.theme = b => { S().settings.theme = b.dataset.v; E.save(); E.applyTheme(); };
-  E.applyTheme = () => { const t = S().settings.theme, dark = t === 'dark' || (t === 'system' && !matchMedia('(prefers-color-scheme: light)').matches); document.documentElement.dataset.theme = dark ? 'dark' : 'light'; const m = E.$('meta[name=theme-color]'); if (m) m.content = dark ? '#13120f' : '#f3eee4'; try { const SB = window.Capacitor && window.Capacitor.Plugins.StatusBar; if (SB) SB.setStyle({ style: dark ? 'DARK' : 'LIGHT' }); } catch (e) { /* optional */ } };
+  E.applyTheme = () => { const t = S().settings.theme, dark = t === 'dark' || (t === 'system' && !matchMedia('(prefers-color-scheme: light)').matches); document.documentElement.dataset.theme = dark ? 'dark' : 'light'; const m = E.$('meta[name=theme-color]'); if (m) m.content = dark ? '#0c0f13' : '#f1f2f5'; try { const SB = window.Capacitor && window.Capacitor.Plugins.SystemBars; if (SB) SB.setStyle({ style: dark ? 'DARK' : 'LIGHT' }); } catch (e) { /* optional */ } };
   matchMedia('(prefers-color-scheme: light)').addEventListener('change', () => E.applyTheme());
   E.A['profile-save'] = () => {
     const p = S().profile; p.wake = { wd: E.val('w-wd') || p.wake.wd, we: E.val('w-we') || p.wake.we }; p.sleep = { wd: E.val('s-wd') || p.sleep.wd, we: E.val('s-we') || p.sleep.we };
@@ -90,7 +90,7 @@
   const setStart = d => {
     if (!d) return; const t = E.today();
     if (d < t) { E.toast('Pick today or a later day'); return; }
-    E.S.profile.start = d; E.save(); E.close(true); E.toast(d === t ? 'Day 1 is today. Let\'s go.' : `Day 1: ${E.fmtDate(d, { weekday: 'long', day: 'numeric', month: 'long' })}`); E.render(); E.A.settings();
+    E.S.profile.start = d; E.save(); E.ui.tday = null; E.close(true); E.toast(d === t ? 'Day 1 is today. Let\'s go.' : `Day 1: ${E.fmtDate(d, { weekday: 'long', day: 'numeric', month: 'long' })}`); E.render(); E.A.settings();
   };
   E.A['start-set'] = el => setStart(el.dataset.d);
   E.A['start-pick'] = () => setStart(E.val('st-d'));

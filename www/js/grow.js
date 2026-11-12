@@ -28,7 +28,7 @@
       ${E.secH('Phrases for work')}
       <div class="list">${E.DE_PHRASES.map(p => E.item({ t: esc(p[0]), s: esc(p[1]) })).join('')}</div>`;
   }
-  E.A['de-start'] = () => { const q = queue(), list = q.due.concat(q.fresh).slice(0, 25).sort(() => Math.random() - 0.5); E.ui.de = { q: list, i: 0, show: false, n: 0 }; deSheet(); };
+  E.A['de-start'] = () => { const q = queue(), list = q.due.concat(q.fresh).slice(0, 25).sort(() => Math.random() - 0.5); if (!list.length) { E.toast('No cards due. Come back tomorrow.'); return; } E.ui.de = { q: list, i: 0, show: false, n: 0 }; deSheet(); };
   const deSheet = () => {
     const r = E.ui.de, c = r.q[r.i];
     E.sheet({ title: 'German', full: true, body: `<div class="player"><div class="step">${r.i + 1} of ${r.q.length}</div>
@@ -136,7 +136,7 @@
 
   E.screens.grow = () => {
     const sub = E.subOf('grow', 'german');
-    return E.hdr('Grow', 'German, career, reading and reflection') + E.seg('grow', [['german', 'German'], ['career', 'Career'], ['reading', 'Reading'], ['journal', 'Journal']], sub) + '<div class="spacer"></div>' +
+    return `<button class="hdr-back" data-a="go-hub">${ic('chevron-left')} All</button>` + E.hdr('Grow', 'German, career, reading and reflection') + E.seg('grow', [['german', 'German'], ['career', 'Career'], ['reading', 'Reading'], ['journal', 'Journal']], sub) + '<div class="spacer"></div>' +
       (sub === 'career' ? careerView() : sub === 'reading' ? readingView() : sub === 'journal' ? journalView() : germanView());
   };
 })(window.E);

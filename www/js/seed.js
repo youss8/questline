@@ -5,20 +5,20 @@
   E.seedHabits = () => [
     H('wake', 'Get up on time', 'sunrise', { time: 'wake', min: 'Out of bed on the first alarm', why: 'A fixed wake time is the anchor for everything else.' }),
     H('nophone', 'No phone for 30 min after waking', 'phone-off', { time: 'wake+5', min: 'No phone until you are out of bed' }),
-    H('teeth', 'Brush teeth', 'brush', { type: 'count', target: 2, unit: 'times', time: '08:00', min: 'One minute is enough tonight', step: 1 }),
+    H('teeth', 'Brush teeth', 'brush', { type: 'count', target: 2, unit: 'times', time: 'all', min: 'One minute is enough tonight', step: 1 }),
     H('water', 'Drink water', 'glass-water', { type: 'count', target: 8, unit: 'glasses', time: 'all', min: 'One glass right now', step: 1 }),
     H('mobility', 'Mobility for back, hips & knees', 'person-standing', { time: '17:15', dur: 10, min: '2 minutes: cat-cow and a hip stretch', open: 'mobility' }),
     H('steps', 'Walk', 'footprints', { type: 'count', target: 8000, unit: 'steps', time: 'all', min: 'One 10-minute walk', step: 1000, auto: 'steps' }),
     H('workout', 'Home workout', 'dumbbell', { days: [1, 4, 6], time: '20:00', dur: 35, min: '15 push-ups and 20 squats', open: 'workout' }),
     H('career', 'Career learning', 'rocket', { days: [0, 1, 5, 6], time: '20:45', dur: 20, min: 'Read one page of docs', open: 'courses' }),
     H('german', 'German practice', 'languages', { days: [1, 3, 5, 6], time: '21:45', dur: 15, min: '10 flashcards', open: 'german' }),
-    H('read', 'Read', 'book-open', { type: 'count', target: 10, unit: 'pages', time: '23:40', min: 'Read one page', step: 1, open: 'books' }),
-    H('money', 'Log every expense', 'receipt', { time: '23:30', min: 'Log your biggest spend', auto: 'money', open: 'money' }),
+    H('read', 'Read', 'book-open', { type: 'count', target: 10, unit: 'pages', time: 'all', min: 'Read one page', step: 1, open: 'books' }),
+    H('money', 'Log expenses', 'receipt', { time: 'all', min: 'Log your biggest spend', auto: 'money', open: 'money' }),
     H('sleep', 'Lights out on time', 'moon-star', { time: 'sleep', min: 'Phone out of the bedroom 15 minutes before' })
   ];
   E.seed = () => ({
-    v: 1,
-    profile: { name: 'Youssef', age: 23, height: 176, sex: 'male', goalKg: 90, start: '2026-11-11', activity: 1.4,
+    v: 2, focus: [], focusNow: null, plan: {}, at: {},
+    profile: { name: 'Youssef', age: 23, height: 176, sex: 'male', goalKg: 90, start: E.today(), activity: 1.4,
       wake: { wd: '07:30', we: '10:00' }, sleep: { wd: '00:30', we: '01:00' } },
     settings: { theme: 'system', reminders: false, evening: '22:30', welcomed: false, prep: {} },
     habits: E.seedHabits(), logs: {}, mood: {},
@@ -52,6 +52,12 @@
     const f = E.seed();
     for (const k in f) if (E.S[k] == null) E.S[k] = f[k];
     for (const k of ['profile', 'settings', 'food', 'money', 'de', 'health', 'cal', 'train', 'mob']) E.S[k] = { ...f[k], ...E.S[k] };
+    if ((E.S.v || 1) < 2) {
+      // version 2: counters live in the "anytime" strip, and an unused Day 1 in the past moves to today
+      for (const h of E.S.habits) if (['teeth', 'read', 'money'].includes(h.id)) h.time = 'all';
+      if (!Object.keys(E.S.logs).length && E.S.profile.start < E.today()) E.S.profile.start = E.today();
+      E.S.v = 2;
+    }
   };
   if (!E.S) { E.S = E.seed(); E.save(); } else E.migrate();
 

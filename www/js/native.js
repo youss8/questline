@@ -18,10 +18,10 @@
       if (E.started(d)) {
         const wake = E.min(E.wakeOf(d));
         push('am' + d, i === 0 && E.ember().dimmed ? 'Relight your ember today' : 'Good morning ☀️', 'Tap to see how you feel and what\'s first today.', at(d, wake + 2));
-        for (const h of E.dayHabits(d)) {
-          const tm = E.hTime(h, d); if (tm == null || h.id === 'wake' || h.id === 'nophone') continue;
-          if (i === 0 && ['done', 'mini'].includes(E.hState(h, d))) continue;
-          push('h' + h.id + d, E.hName(h, d), h.min ? `Hard day? ${h.min}` : 'Tap to tick it off.', at(d, h.id === 'sleep' ? tm - 30 : tm));
+        for (const it of E.planDay(d).items) {
+          if (it.kind !== 'habit' || it.id === 'wake' || it.id === 'nophone' || it.state === 'done' || it.state === 'mini') continue;
+          const h = it.h; if (at(d, it.t) <= now) continue;
+          push('h' + h.id + d, it.title, h.min ? `Hard day? ${h.min}` : 'Tap to tick it off.', at(d, h.id === 'sleep' ? it.t - 30 : it.t));
         }
         const sc = E.dayScore(d);
         if (!(i === 0 && sc.p >= E.KEEP)) push('ev' + d, 'Your ember needs you tonight', i === 0 ? `${sc.done + sc.mini}/${sc.due} done. A few small versions keep it lit.` : 'Check what\'s left before the day ends.', at(d, E.min(st.evening || '22:30')));
@@ -35,6 +35,7 @@
         push(a.kind + a.id + d + 'b', a.t != null ? `In 2 hours: ${title}` : `Today: ${title}`, a.t != null ? `At ${E.time12(E.hm(a.t))}` : 'Don\'t forget', a.t != null ? new Date(when - 2 * 36e5) : when);
       }
     }
+    const fn = S().focusNow; if (fn && fn.paused == null) push('focus' + fn.end, 'Focus session finished', `${fn.mins} minutes on ${fn.label}. Open Ember to log it.`, new Date(fn.end));
     for (const s of S().money.subs) { if (E.diff(s.next, t) > 8) continue; push('s' + s.id + s.next + 'a', `${s.name} renews tomorrow`, E.amtTxt(s.amt, s.cur), at(E.add(s.next, -1), 19 * 60)); push('s' + s.id + s.next + 'b', `${s.name} renews today`, `${E.amtTxt(s.amt, s.cur)} · mark it paid in Money`, at(s.next, 10 * 60)); }
     const sal = S().money.salary;
     if (sal && sal.day) { const p = E.parse(t), d = E.nextOcc(E.ymd(new Date(p.getFullYear(), p.getMonth(), sal.day)), 'monthly', t); if (d && E.diff(d, t) <= 7) push('pay' + d, 'Payday 💰', 'Log your salary in Money.', at(d, 18 * 60)); }
@@ -60,7 +61,7 @@
     const habits = started ? E.dayHabits(t).slice(0, 8).map(h => { const v = E.log(t, h.id), st = E.hState(h, t); return { id: h.id, name: E.hName(h, t), type: h.type, count: typeof v === 'number' ? v : st === 'done' ? h.target : 0, target: h.target, step: h.step || 1, done: st === 'done' || st === 'mini' }; }) : [];
     return { date: t, started, start: S().profile.start, streak: em.streak, done: sc.done + sc.mini, total: sc.due, habits,
       cal: { target: T.kcal, eaten: f.k, protein: f.p, proteinTarget: T.p },
-      next: n ? { title: n.kind === 'habit' ? E.hName(n.h, t) : n.title, time: E.time12(E.hm(n.t)), kind: n.kind === 'habit' ? 'Habit' : n.kind === 'block' ? 'Schedule' : n.kind === 'task' ? 'Task' : 'Date' } : null,
+      next: n ? { title: n.title, time: E.time12(E.hm(n.t)), kind: n.kind === 'habit' ? 'Habit' : n.kind === 'meal' ? 'Meal' : n.kind === 'task' ? 'Task' : 'Date' } : null,
       quote: E.quoteOf(t), quoteCat: em.streak ? `${em.streak}-day fire` : 'Ember' };
   };
   let wT = null;
@@ -89,14 +90,14 @@
     try {
       const from = E.parse(E.today()).getTime(), r = await p.list({ from, to: from + 30 * 864e5 });
       E.ui.phoneEv = (r.events || []).map(e => { const d = new Date(e.begin); return { title: e.title || '(no title)', date: e.allDay ? new Date(d.getTime() + d.getTimezoneOffset() * 6e4 + 12 * 36e5).toISOString().slice(0, 10) : E.ymd(d), time: e.allDay ? null : E.pad(d.getHours()) + ':' + E.pad(d.getMinutes()) }; });
-      if (E.ui.tab === 'plan' || E.ui.tab === 'today') E.render();
+      E.ver++; if (E.ui.tab === 'plan' || E.ui.tab === 'today') E.render();
     } catch (x) { /* ignore */ }
   };
   E.calCard = () => {
     if (!PC()) return '';
     if (!S().cal.on) return `<section class="card" style="margin-top:14px"><div class="row"><div class="ico" style="--c:var(--slate)">${ic('calendar-days')}</div><div class="grow"><div class="card-t">Connect Google Calendar</div><div class="small muted">See your calendar here; your Ember dates appear there.</div></div></div><button class="btn ghost wide" style="margin-top:12px" data-a="cal-on">Connect</button></section>`;
-    const d = E.ui.day || E.today(), ev = E.ui.phoneEv.filter(e => e.date === d);
-    return ev.length ? E.secH('From your calendar') + `<div class="list">${ev.map(e => E.item({ icon: 'calendar', sm: true, c: 'var(--slate)', t: esc(e.title), s: e.time ? E.time12(e.time) : 'All day' })).join('')}</div>` : '';
+    const ev = E.ui.phoneEv.slice(0, 12);
+    return E.secH('From your calendar') + `<div class="list">${ev.map(e => E.item({ icon: 'calendar', sm: true, c: 'var(--slate)', t: esc(e.title), s: `${E.rel(e.date)}${e.time ? ' · ' + E.time12(e.time) : ''}` })).join('') || '<p class="empty">Nothing in the next 30 days.</p>'}</div>`;
   };
   E.A['cal-on'] = async () => {
     const p = PC(); if (!p) { E.toast('This works in the phone app'); return; }
@@ -110,17 +111,18 @@
 
   // ================= lifecycle =================
   E.afterSave = () => { E.pushWidgets(); E.schedule(); };
-  E.onResume = () => { E.rollSubs(); E.autoMoney(E.today()); E.pullTicks(); E.healthSync(); E.pullCal(); E.render(); E.pushWidgets(); };
+  E.onResume = () => { E.focusResume(); E.rollSubs(); E.autoMoney(E.today()); E.pullTicks(); E.healthSync(); E.pullCal(); E.render(); E.pushWidgets(); };
   const App = P().App;
   if (App && App.addListener) {
     App.addListener('resume', () => E.onResume());
     App.addListener('backButton', () => {
       if (E.$('#scan')) { E.A['scan-stop'](); return; }
       if (E.$('.scrim')) { E.close(); return; }
+      if (E.$('#focus')) { E.A['focus-min'](); return; }
       if (E.ui.tab !== 'today') { E.go('today'); return; }
       if (App.exitApp) App.exitApp();
     });
   }
   let lastDay = E.today();
-  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && E.today() !== lastDay) { lastDay = E.today(); E.ui.day = null; E.ui.foodDay = null; E.onResume(); } });
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { if (E.today() !== lastDay) { lastDay = E.today(); E.ui.tday = null; E.ui.foodDay = null; } E.onResume(); } });
 })(window.E);
