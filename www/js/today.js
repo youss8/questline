@@ -21,7 +21,7 @@
   const orb = () => {
     const n = E.now(), m = n.getHours() * 60 + n.getMinutes(), day = m >= 330 && m < 1110;
     const p = day ? (m - 330) / 780 : ((m + 1440 - 1110) % 1440) / 660;
-    return `<div class="orb ${day ? '' : 'moon'}" style="left:${56 + p * 36}%;top:${46 - Math.sin(Math.PI * p) * 30}%"></div>`;
+    return `<div class="orb ${day ? '' : 'moon'}" style="left:${66 + p * 28}%;top:${40 - Math.sin(Math.PI * p) * 26}%"></div>`;
   };
   function sky(d) {
     const t = E.today(), isToday = d === t, em = E.ember(), sc = E.dayScore(d), started = E.started(d), ph = phase();
@@ -57,6 +57,8 @@
   E.A.mood = el => { S().mood[E.today()] = +el.dataset.v; E.save(); E.buzz(10); E.toast(['', 'Hard days pass. Do the small versions today.', 'Go easy. Just keep the fire lit.', 'Steady. One thing at a time.', 'Good. Use the energy.', 'Great. Make it count.'][+el.dataset.v]); E.render(); };
   const SETUP = [['rules', 'See how Ember works', 'welcome', 'flame'], ['remind', 'Turn on reminders', 'set-remind', 'bell'], ['health', 'Connect Samsung Health', 'health-on', 'heart-pulse'], ['cal', 'Connect Google Calendar', 'cal-on', 'calendar-days'],
     ['dates', 'Add your important dates', 'new-event', 'gift'], ['money', 'Set salary, rate and budgets', 'money-settings', 'wallet'], ['widget', 'Add the home-screen widget', 'widget-help', 'layout-grid']];
+  E.setupLeft = () => S().settings.prepHide ? [] : SETUP.filter(i => !S().settings.prep[i[0]]);
+  E.SETUPN = SETUP.length;
   function setupCard() {
     const pr = S().settings.prep, left = SETUP.filter(i => !pr[i[0]]); if (!left.length || S().settings.prepHide) return '';
     return `<button class="coach" style="--c:var(--slate)" data-a="setup"><div class="ico" style="--c:var(--slate)">${ic('wand-sparkles')}</div><div class="grow"><div class="t">Finish setting up · ${SETUP.length - left.length}/${SETUP.length}</div><div class="s">Next: ${left[0][1].toLowerCase()}</div></div>${ic('chevron-right', 'dim')}</button>`;
@@ -122,7 +124,7 @@
     return `<div class="tl">${html}</div>`;
   }
 
-  E.screens.today = () => {
+  E.screens.day = () => {
     const d = D(), t = E.today(), isToday = d === t, p = E.planDay(d), fn = S().focusNow;
     const extra = p.allDay.concat(p.unplaced);
     const eve = isToday && (E.nowMin() >= 20 * 60);

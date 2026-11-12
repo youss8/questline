@@ -55,7 +55,7 @@
     const y = window.scrollY;
     const html = (E.screens[t] || E.screens.today)();
     v.innerHTML = `<div class="${fresh ? 'screen' : ''}">${html}</div>`;
-    const grp = ['plan', 'grow', 'insights'].includes(t) ? 'hub' : t; E.$$('#nav [data-tab]').forEach(b => b.classList.toggle('on', b.dataset.tab === grp));
+    const grp = ['plan', 'grow', 'health', 'money'].includes(t) ? 'hub' : t; E.$$('#nav [data-tab]').forEach(b => b.classList.toggle('on', b.dataset.tab === grp));
     if (!fresh) window.scrollTo(0, y);
     if (E.afterRender) E.afterRender();
   };

@@ -279,6 +279,6 @@
 
   E.screens.health = () => {
     const sub = E.subOf('health', 'food');
-    return E.hdr('Health', sub === 'food' ? 'What you eat, simply logged' : sub === 'move' ? 'Move a little, every day' : `Goal: ${S().profile.goalKg} kg`) + E.seg('health', [['food', 'Food'], ['move', 'Move'], ['body', 'Body']], sub) + '<div class="spacer"></div>' + (sub === 'move' ? moveView() : sub === 'body' ? bodyView() : foodView());
+    return `<button class="hdr-back" data-a="go-today">${ic('chevron-left')} Home</button>` + E.hdr('Health', sub === 'food' ? 'What you eat, simply logged' : sub === 'move' ? 'Move a little, every day' : `Goal: ${S().profile.goalKg} kg`) + E.seg('health', [['food', 'Food'], ['move', 'Move'], ['body', 'Body']], sub) + '<div class="spacer"></div>' + (sub === 'move' ? moveView() : sub === 'body' ? bodyView() : foodView());
   };
 })(window.E);

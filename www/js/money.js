@@ -25,7 +25,7 @@
     const subsMonthly = M().subs.reduce((a, s) => a + E.conv(s.amt, s.cur) / (s.cycle === 'yearly' ? 12 : 1), 0);
     if (subsMonthly) insights.push(['repeat', `Subscriptions cost ${E.money(subsMonthly)} a month`, 'var(--rose)']);
     const byDay = {}; for (const x of tx.slice().sort((a, b) => b.date.localeCompare(a.date) || b.t - a.t)) (byDay[x.date] = byDay[x.date] || []).push(x);
-    return E.hdr('Money', 'Know where every coin goes', `<button class="hdr-btn" data-a="money-settings" aria-label="Money settings">${ic('sliders-horizontal')}</button>`) +
+    return `<button class="hdr-back" data-a="go-today">${ic('chevron-left')} Home</button>` + E.hdr('Money', 'Know where every coin goes', `<button class="hdr-btn" data-a="money-settings" aria-label="Money settings">${ic('sliders-horizontal')}</button>`) +
       `<div class="row" style="justify-content:space-between;margin-bottom:12px"><button class="round" data-a="ym" data-n="-1" aria-label="Previous month">${ic('chevron-left')}</button><b class="mid" style="font-size:18px">${monthName(ym)}</b><button class="round" data-a="ym" data-n="1" ${isNow ? 'disabled' : ''} aria-label="Next month">${ic('chevron-right')}</button></div>
       <section class="card tint"><div class="label">Spent</div><div class="big">${E.money(spent)}</div>
         ${budget ? `<div class="progress-line" style="margin:12px 0 6px">${E.bar(E.pct(spent, budget), spent > budget ? 'var(--bad)' : null)}</div><div class="small muted">${spent <= budget ? `${E.money(budget - spent)} left of ${E.money(budget)} budget` : `${E.money(spent - budget)} over budget`}</div>` : `<div class="small muted" style="margin-top:6px"><button class="link ember" style="font-weight:600" data-a="budgets">Set monthly budgets</button> to see what's left.</div>`}
@@ -99,7 +99,9 @@
     <div class="label" style="margin:16px 4px 8px">Monthly salary</div>
     <div class="row" style="gap:8px"><input id="ms-a" type="number" inputmode="decimal" value="${s.amt || ''}" placeholder="Amount" style="flex:1">${E.chips('ms-c', ['USD', 'SYP'], s.cur || 'USD')}</div><div class="spacer"></div>
     ${E.field('Payday (day of month)', `<input id="ms-d" type="number" inputmode="numeric" min="1" max="31" value="${s.day || ''}" placeholder="e.g. 28">`)}
-    <button class="btn ghost wide" data-a="budgets">${ic('target')} Monthly budgets</button>`,
+    <button class="btn ghost wide" data-a="budgets">${ic('target')} Monthly budgets</button>
+    <button class="btn ghost wide" style="margin-top:10px" data-a="goals-open">${ic('piggy-bank')} Savings goals</button>
+    <button class="btn ghost wide" style="margin-top:10px" data-a="money-csv">${ic('download')} Export all transactions (spreadsheet)</button>`,
     foot: '<button class="btn primary" data-a="money-save">Save</button>' }); };
   E.A['money-save'] = () => { const m = M(); m.show = E.val('ms-s') || m.show; m.rate = E.num('ms-r') || m.rate; const a = E.num('ms-a'); m.salary = a > 0 ? { amt: a, cur: E.val('ms-c'), day: E.clamp(E.num('ms-d') || 1, 1, 31) } : null; E.save(); E.close(true); E.toast('Saved'); E.render(); };
   E.A.budgets = () => { E.close(true); const m = M(); E.sheet({ title: `Monthly budgets (${m.show})`, full: true, body: `<p class="hint" style="margin-top:0">Leave empty for no limit.</p><div class="list">${E.CATS.map(c => `<div class="item"><div class="ico sm" style="--c:${c.c}">${ic(c.icon)}</div><div class="grow t">${c.n}</div><input data-bud="${c.id}" type="number" inputmode="decimal" style="width:110px;text-align:right" value="${m.budgets[c.id] ? Math.round(E.conv(m.budgets[c.id].amt, m.budgets[c.id].cur)) : ''}" placeholder="—"></div>`).join('')}</div>`, foot: '<button class="btn primary" data-a="bud-save">Save budgets</button>' }); };

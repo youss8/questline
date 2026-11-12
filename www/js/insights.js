@@ -54,32 +54,45 @@
 
   E.screens.insights = () => {
     const sub = E.subOf('insights', 'coach');
-    return `<button class="hdr-back" data-a="go-hub">${ic('chevron-left')} All</button>` + E.hdr('Insights', 'Your coach and your numbers') + E.seg('insights', [['coach', 'Coach'], ['week', 'Week'], ['month', 'Month'], ['all', '90 days']], sub) + '<div class="spacer"></div>' +
+    return E.hdr('Insights', 'Your coach and your numbers') + E.seg('insights', [['coach', 'Coach'], ['week', 'Week'], ['month', 'Month'], ['all', '90 days']], sub) + '<div class="spacer"></div>' +
       (sub === 'coach' ? coachView() : report(sub === 'week' ? 7 : sub === 'month' ? 30 : 90));
   };
 
   // ================= hub: everything in one place =================
   E.screens.hub = () => {
-    const t = E.today(), open = S().tasks.filter(k => !k.done).length, q = Object.values(S().de.srs).filter(v => v.due <= t).length, c = E.coach()[0];
+    const t = E.today(), open = S().tasks.filter(k => !k.done).length, q = Object.values(S().de.srs).filter(v => v.due <= t).length, T = E.targets(), f = E.dayFood(t);
     const up = S().events.map(e => E.nextOcc(e.date, e.repeat, t)).filter(Boolean).sort()[0];
-    const tile = (a, icon, col, title, sub, attrs) => `<button class="tile" data-a="${a}" ${attrs || ''}><div class="ico" style="--c:${col}">${ic(icon)}</div><div><b>${title}</b><br><small>${sub}</small></div></button>`;
+    const tile = (a, icon, cls, title, sub, attrs) => `<div class="bt c ${cls}" data-a="${a}" role="button" tabindex="0" ${attrs || ''}><small class="bl">${ic(icon)}${title}</small><em style="margin-top:auto">${sub}</em></div>`;
+    const sec = n => `<div class="sec" style="grid-column:span 2;margin:14px 4px 0"><h2>${n}</h2></div>`;
     return E.hdr('Everything', 'All of your life, one tap away', `<button class="hdr-btn" data-a="settings" aria-label="Settings">${ic('settings')}</button>`) +
-      `<div class="grid2">
-        ${tile('go-coach', 'message-circle', 'var(--ember)', 'Coach', esc(c ? c.title : 'On track'))}
-        ${tile('go-reports', 'chart-column', 'var(--slate)', 'Reports', 'Week, month, 90 days')}
-        ${tile('focus-new', 'timer', 'var(--plum)', 'Focus timer', `${E.focusMins(E.range(7))} min this week`)}
-        ${tile('go-tasks', 'list-checks', 'var(--sage)', 'Tasks', open ? `${open} open` : 'Nothing open')}
-        ${tile('go-dates', 'gift', 'var(--rose)', 'Dates & notes', up ? `Next: ${E.rel(up).toLowerCase()}` : 'Birthdays, notes')}
-        ${tile('go-german', 'languages', 'var(--plum)', 'German', q ? `${q} cards due` : `${S().de.course.name} · ${S().de.course.left} lessons left`)}
-        ${tile('go-career', 'rocket', 'var(--slate)', 'Career', 'Roadmaps and courses')}
-        ${tile('go-reading', 'book-open', 'var(--sand)', 'Reading', S().books.filter(b => !b.done).length ? `${S().books.filter(b => !b.done).length} in progress` : 'Add a book')}
-        ${tile('go-journal', 'feather', 'var(--sage)', 'Journal', S().journal[t] ? 'Today is written' : 'Close your day')}
-        ${tile('go-week', 'calendar-clock', 'var(--slate)', 'Weekly schedule', 'Work, class, meal times')}
-        ${tile('habits-edit', 'flame', 'var(--ember)', 'Habits', `${S().habits.filter(h => !h.off).length} active`)}
-        ${tile('settings', 'settings', 'var(--muted)', 'Settings', 'Start day, reminders, look')}
+      `<div class="bento">
+        ${sec('Body')}
+        ${tile('go-health', 'utensils', 'd', 'Food diary', `${E.n(Math.max(0, T.kcal - f.k))} kcal left`)}
+        ${tile('go-move', 'dumbbell', 's', 'Workout & mobility', `${S().train.logs.length} workouts done`)}
+        ${tile('go-body', 'scale', 'm', 'Weight & body', `${E.n(E.weightNow(), 1)} kg · goal ${S().profile.goalKg}`)}
+        ${tile('fast-open', 'hourglass', 'd', 'Fasting timer', S().fast.start ? 'Running' : 'Not fasting')}
+        ${sec('Money')}
+        ${tile('go-money', 'wallet', 'o', 'Money', 'Spending, budgets, subscriptions')}
+        ${tile('goals-open', 'piggy-bank', 'm', 'Savings goals', S().money.goals.length ? `${S().money.goals.length} goal${S().money.goals.length === 1 ? '' : 's'}` : 'Set a goal')}
+        ${tile('shop-open', 'shopping-cart', 'd', 'Shopping list', `${S().shop.filter(x => !x.done).length} to buy`)}
+        ${tile('go-prep', 'chef-hat', 'd', 'Meal prep', 'Recipes and groceries')}
+        ${sec('Plan')}
+        ${tile('go-tasks', 'list-checks', 'd', 'Tasks', open ? `${open} open` : 'Nothing open')}
+        ${tile('go-dates', 'gift', 'r', 'Dates & notes', up ? `Next: ${E.rel(up).toLowerCase()}` : 'Birthdays, notes')}
+        ${tile('go-week', 'calendar-clock', 'k', 'Weekly schedule', 'Work, class, meal times')}
+        ${tile('habits-edit', 'flame', 'o', 'Habits', `${S().habits.filter(h => !h.off).length} active`)}
+        ${sec('Grow')}
+        ${tile('focus-new', 'timer', 'l', 'Focus timer', `${E.focusMins(E.range(7))} min this week`)}
+        ${tile('go-german', 'languages', 'l', 'German', q ? `${q} cards due` : `${S().de.course.name} · ${S().de.course.left} lessons left`)}
+        ${tile('go-career', 'rocket', 'k', 'Career', 'Roadmaps and courses')}
+        ${tile('go-reading', 'book-open', 'd', 'Reading', S().books.filter(b => !b.done).length ? `${S().books.filter(b => !b.done).length} in progress` : 'Add a book')}
+        ${tile('go-journal', 'feather', 'd', 'Journal', S().journal[t] ? 'Today is written' : 'Close your day')}
+        ${tile('breathe', 'wind', 'k', 'Breathe', '1 minute of calm')}
+        ${tile('miles-open', 'trophy', 'o', 'Milestones', `${E.milestones().filter(x => x.ok).length} earned`)}
+        ${tile('settings', 'settings', 'd', 'Settings', 'Start day, reminders, look')}
       </div>`;
   };
   const go = (tab, sub) => () => { E.close(true); E.go(tab, sub); };
   Object.assign(E.A, { 'go-hub': go('hub'), 'go-coach': go('insights', 'coach'), 'go-reports': go('insights', 'week'), 'go-tasks': go('plan', 'tasks'), 'go-dates': go('plan', 'important'), 'go-week': go('plan', 'week'),
-    'go-german': go('grow', 'german'), 'go-career': go('grow', 'career'), 'go-reading': go('grow', 'reading'), 'go-journal': go('grow', 'journal'), 'go-health': go('health', 'food'), 'go-money': go('money'), 'go-today': go('today') });
+    'go-german': go('grow', 'german'), 'go-career': go('grow', 'career'), 'go-reading': go('grow', 'reading'), 'go-journal': go('grow', 'journal'), 'go-health': go('health', 'food'), 'go-body': go('health', 'body'), 'go-prep': () => { E.close(true); E.ui.sub.food = 'prep'; E.go('health', 'food'); }, 'go-money': go('money'), 'go-today': go('today') });
 })(window.E);

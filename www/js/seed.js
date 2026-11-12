@@ -17,7 +17,7 @@
     H('sleep', 'Lights out on time', 'moon-star', { time: 'sleep', min: 'Phone out of the bedroom 15 minutes before' })
   ];
   E.seed = () => ({
-    v: 2, focus: [], focusNow: null, plan: {}, at: {},
+    v: 2, focus: [], focusNow: null, plan: {}, at: {}, fast: { start: null, goal: 16, log: [] }, shop: [],
     profile: { name: 'Youssef', age: 23, height: 176, sex: 'male', goalKg: 90, start: E.today(), activity: 1.4,
       wake: { wd: '07:30', we: '10:00' }, sleep: { wd: '00:30', we: '01:00' } },
     settings: { theme: 'system', reminders: false, evening: '22:30', welcomed: false, prep: {} },
@@ -43,7 +43,7 @@
       { id: 'personal', name: 'Personal', icon: 'house', c: 'var(--muted)' }
     ],
     tasks: [], events: [], notes: [],
-    money: { tx: [], budgets: {}, salary: null, subs: [], rate: 13000, show: 'USD' },
+    money: { tx: [], budgets: {}, salary: null, subs: [], goals: [], rate: 13000, show: 'USD' },
     de: { srs: {}, course: { name: 'A1.1', left: 4, next: 'A1.2' }, lessons: [], seen: 0 },
     courses: [], books: [], career: { done: {} }, journal: {}, qfav: [],
     health: { on: false, steps: {}, sleep: {}, rhr: null, last: 0 }, cal: { on: false }
